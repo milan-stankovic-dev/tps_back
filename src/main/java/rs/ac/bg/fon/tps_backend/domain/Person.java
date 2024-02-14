@@ -2,6 +2,7 @@ package rs.ac.bg.fon.tps_backend.domain;
 
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.cglib.core.Local;
@@ -9,6 +10,7 @@ import org.springframework.cglib.core.Local;
 import java.time.LocalDate;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -28,4 +30,6 @@ public class Person {
     @ManyToOne
     @JoinColumn(name = "city_residence_id")
     private City cityOfResidence;
+
+
 }
