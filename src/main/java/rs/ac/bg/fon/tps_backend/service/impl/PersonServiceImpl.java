@@ -1,5 +1,6 @@
 package rs.ac.bg.fon.tps_backend.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
@@ -78,7 +79,43 @@ public class PersonServiceImpl implements PersonService {
     }
 
     @Override
-    public Person updatePerson(PersonSaveDTO p) throws Exception {
-        return null;
+    public PersonSaveDTO updatePerson(PersonSaveDTO p) throws Exception {
+        if(p == null){
+            throw new PersonNotInitializedException("Your person may not be null.");
+        }
+        if(p.id() == null){
+            throw new PersonNotInitializedException("Your person's ID may not be null.");
+        }
+        final var personDbOpt =
+                personRepository.findById(p.id());
+
+        if(personDbOpt.isEmpty()){
+            throw new EntityNotFoundException("The person with given ID may not exist.");
+        }
+        final Person personFromDb = personDbOpt.get();
+
+        final var cityBirthDbOpt =
+                cityRepository.findByPtpbr(p.birthCityCode());
+
+        if(cityBirthDbOpt.isEmpty()){
+            throw new EntityNotFoundException("The city of birth does not exist.");
+        }
+        final City cityOfBirth = cityBirthDbOpt.get();
+
+        final var cityResidenceDbOpt =
+                cityRepository.findByPtpbr(p.residenceCityCode());
+
+        if(cityResidenceDbOpt.isEmpty()){
+            throw new EntityNotFoundException("The city of residence does not exist.");
+        }
+        final City cityOfResidence = cityResidenceDbOpt.get();
+        final Person personToSave =
+                personSaveConverter.toEntity(p);
+
+        personToSave.setCityOfBirth(cityOfBirth);
+        personToSave.setCityOfResidence(cityOfResidence);
+
+        return personSaveConverter
+                .toDto(personRepository.save(personToSave));
     }
 }

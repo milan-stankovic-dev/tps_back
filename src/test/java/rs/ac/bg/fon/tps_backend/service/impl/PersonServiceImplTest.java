@@ -1,10 +1,12 @@
 package rs.ac.bg.fon.tps_backend.service.impl;
 
 
+import jakarta.persistence.EntityNotFoundException;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
@@ -191,5 +193,142 @@ public class PersonServiceImplTest {
         personService.deletePerson(1L);
         verify(personRepository, times(1))
                 .deleteById(1L);
+    }
+
+    @Test
+    @DisplayName("Throws exception due to null person to update")
+    void updateNullPerson() throws Exception {
+        assertThatThrownBy(()->personService.updatePerson(null))
+                .isInstanceOf(PersonNotInitializedException.class)
+                .hasMessage("Your person may not be null.");
+
+        verify(personRepository, never()).save(null);
+    }
+
+    @Test
+    @DisplayName("Throws exception due to null id for person to update")
+    void updateNullIdPerson() throws Exception {
+        final PersonSaveDTO person = new PersonSaveDTO(
+                null, "Pera", "Peric",
+                LocalDate.of(2000, 1, 1),
+                11_000, 19_000
+        );
+
+        ArgumentCaptor<Person> personCaptor =
+                ArgumentCaptor.forClass(Person.class);
+
+        assertThatThrownBy(()->personService.updatePerson(person))
+                .isInstanceOf(PersonNotInitializedException.class)
+                .hasMessage("Your person's ID may not be null.");
+
+        verify(personRepository, never()).save(personCaptor.capture());
+    }
+
+    @Test
+    @DisplayName("Throws exception after trying to update non existing person")
+    void updateNonExistingPerson() throws Exception {
+        final PersonSaveDTO person = new PersonSaveDTO(
+                5555L, "Pera", "Peric",
+                LocalDate.of(2000, 1, 1),
+                11_000, 19_000
+        );
+
+//        when(cityRepository.findByPtpbr(person.birthCityCode()))
+//                .thenReturn(Optional.empty());
+
+        ArgumentCaptor<Person> personCaptor =
+                ArgumentCaptor.forClass(Person.class);
+
+        assertThatThrownBy(()->personService.updatePerson(person))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("The person with given ID may not exist.");
+
+        verify(personRepository, never()).save(personCaptor.capture());
+    }
+
+    @Test
+    @DisplayName("Throws exception due to unknown city of birth")
+    void updateUnknownCityOfBirth() throws Exception {
+        final PersonSaveDTO person = new PersonSaveDTO(
+                1L, "Pera", "Peric",
+                LocalDate.of(2000, 1, 1),
+                11_000, 19_000
+        );
+
+        when(personRepository.findById(person.id()))
+                .thenReturn(Optional.of(new Person()));
+
+        ArgumentCaptor<Person> personCaptor =
+                ArgumentCaptor.forClass(Person.class);
+
+        assertThatThrownBy(()->personService.updatePerson(person))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("The city of birth does not exist.");
+
+        verify(personRepository, never()).save(personCaptor.capture());
+    }
+
+    @Test
+    @DisplayName("Throws exception due to unknown city of residence")
+    void updateUnknownCityOfResidence() throws Exception {
+        final PersonSaveDTO person = new PersonSaveDTO(
+                1L, "Pera", "Peric",
+                LocalDate.of(2000, 1, 1),
+                11_000, 19_000
+        );
+
+        when(personRepository.findById(person.id()))
+                .thenReturn(Optional.of(new Person()));
+        when(cityRepository.findByPtpbr(11_000))
+                .thenReturn(Optional.of(new City()));
+
+        ArgumentCaptor<Person> personCaptor =
+                ArgumentCaptor.forClass(Person.class);
+
+        assertThatThrownBy(()->personService.updatePerson(person))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("The city of residence does not exist.");
+
+        verify(personRepository, never()).save(personCaptor.capture());
+    }
+
+    @Test
+    @DisplayName("Updates person successfully.")
+    void updateSuccessful() throws Exception {
+        final PersonSaveDTO person = new PersonSaveDTO(
+                1L, "Pera", "Peric",
+                LocalDate.of(2000, 1, 1),
+                11_000, 19_000
+        );
+//
+//        when(personRepository.findById(person.id()))
+//                .thenReturn(Optional.of(new Person()));
+        when(cityRepository.findByPtpbr(11_000))
+                .thenReturn(Optional.of(City.builder()
+                        .ptpbr(11_000).build()));
+        when(cityRepository.findByPtpbr(19_000))
+                .thenReturn(Optional.of(City.builder()
+                        .ptpbr(19_000).build()));
+        when(personSaveConverter.toEntity(person))
+                .thenReturn(
+                    new Person(1L, "Pera", "Peric",
+                            LocalDate.of(2000,1,1),
+                            0,
+                            City.builder().ptpbr(11_000).build(),
+                            City.builder().ptpbr(19_000).build())
+                );
+
+        ArgumentCaptor<Person> personCaptor =
+                ArgumentCaptor.forClass(Person.class);
+
+        personService.savePerson(person);
+//        final Person personCaptured = personCaptor.capture();
+
+        verify(personRepository, times(1))
+                .save(personCaptor.capture());
+
+//        assertThat(personCaptured).isEqualTo(
+//                personSaveConverter.toEntity(person));
+
     }
 }

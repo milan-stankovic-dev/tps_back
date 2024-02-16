@@ -33,4 +33,11 @@ public class PersonController {
         personService.deletePerson(id);
         return ResponseEntity.noContent().build();
     }
+
+    @PutMapping
+    public ResponseEntity<PersonSaveDTO> alterPerson(@Valid @RequestBody
+                                                     PersonSaveDTO personSaveDTO) throws Exception {
+        return ResponseEntity.ok(
+                personService.updatePerson(personSaveDTO));
+    }
 }

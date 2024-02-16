@@ -10,5 +10,5 @@ public interface PersonService {
     List<PersonDisplayDTO> getAll();
     PersonSaveDTO savePerson(PersonSaveDTO p) throws Exception;
     void deletePerson(Long id) throws Exception;
-    Person updatePerson(PersonSaveDTO p) throws Exception;
+    PersonSaveDTO updatePerson(PersonSaveDTO p) throws Exception;
 }
