@@ -24,7 +24,8 @@ public class PersonController {
 
     @PostMapping
     public ResponseEntity<PersonSaveDTO> savePerson(@Valid @RequestBody
-                                                           PersonSaveDTO personSaveDTO) throws Exception{
+                                                           PersonSaveDTO personSaveDTO)
+                                                            throws Exception{
         return ResponseEntity.ok(personService.savePerson(personSaveDTO));
     }
 
