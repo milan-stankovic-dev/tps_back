@@ -1,0 +1,20 @@
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
+                        http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
+    <property name="defaultSchemaName" value="public"/>
+
+    <changeSet id="create_city" author="milan s.">
+        <sqlFile path="ddl/create_city.sql"
+                 relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="create_person" author="milan s.">
+        <sqlFile path="ddl/create_person.sql"
+                 relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="populate_city" author="milan s.">
+        <sqlFile path="dml/populate_city.sql"
+                 relativeToChangelogFile="true"/>
+    </changeSet>
+
+</databaseChangeLog>
