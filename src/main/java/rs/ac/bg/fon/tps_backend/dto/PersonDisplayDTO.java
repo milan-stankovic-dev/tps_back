@@ -6,6 +6,7 @@ public record PersonDisplayDTO(
     Long id,
     String firstName,
     String lastName,
+    int heightInCm,
     LocalDate dOB,
     int ageInMonths,
     String cityOfBirthName,

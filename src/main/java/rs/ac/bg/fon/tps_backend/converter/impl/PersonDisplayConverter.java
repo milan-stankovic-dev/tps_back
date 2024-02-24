@@ -17,6 +17,7 @@ public class PersonDisplayConverter implements DTOEntityConverter<PersonDisplayD
         return new Person(personDisplayDTO.id(),
                 personDisplayDTO.firstName(),
                 personDisplayDTO.lastName(),
+                personDisplayDTO.heightInCm(),
                 personDisplayDTO.dOB(),
                 personDisplayDTO.ageInMonths(),
                 City.builder()
@@ -36,6 +37,7 @@ public class PersonDisplayConverter implements DTOEntityConverter<PersonDisplayD
                 person.getId(),
                 person.getFirstName(),
                 person.getLastName(),
+                person.getHeightInCm(),
                 person.getDOB(),
                 person.getAgeInMonths(),
                 person.getCityOfBirth() == null ?

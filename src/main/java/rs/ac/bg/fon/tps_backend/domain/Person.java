@@ -33,6 +33,11 @@ public class Person {
     @Column(name = "last_name")
     private String lastName;
 
+    @Min(value = 70, message = "Person's height must be at least 70 cm.")
+    @Max(value = 260, message = "Person's height must be at most 260 cm.")
+    @Column(name = "height_in_cm")
+    private int heightInCm;
+
     @NotNull
     @YearRange(earliestYear = 1950, latestYear = 2005)
     @Column(name = "dob")

@@ -20,6 +20,7 @@ public class PersonSaveConverter implements DTOEntityConverter<PersonSaveDTO, Pe
         return new Person(personSaveDTO.id(),
                 personSaveDTO.firstName(),
                 personSaveDTO.lastName(),
+                personSaveDTO.heightInCm(),
                 personSaveDTO.dOB(),
                 0,
                 cityOfBirth, cityOfResidence);
@@ -31,6 +32,7 @@ public class PersonSaveConverter implements DTOEntityConverter<PersonSaveDTO, Pe
                 person.getId(),
                 person.getFirstName(),
                 person.getLastName(),
+                person.getHeightInCm(),
                 person.getDOB(),
                 person.getCityOfBirth() == null? null :
                         person.getCityOfBirth().getPptbr(),

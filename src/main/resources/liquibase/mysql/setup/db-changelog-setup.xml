@@ -12,6 +12,14 @@
         <sqlFile path="ddl/create_person.sql"
                  relativeToChangelogFile="true"/>
     </changeSet>
+    <changeSet id="create_trigger_calculate_age" author="milan s.">
+        <sqlFile path="ddl/create_trigger_calculate_age.sql" relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="create_trigger_calculate_age_update" author="milan s.">
+        <sqlFile path="ddl/create_trigger_calculate_age_update.sql" relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
     <changeSet id="populate_city" author="milan s.">
         <sqlFile path="dml/populate_city.sql"
                  relativeToChangelogFile="true"/>
@@ -22,14 +30,6 @@
     </changeSet>
     <changeSet id="create_func_calculate_age" author="milan s.">
         <sqlFile path="ddl/create_func_calculate_age.sql" relativeToChangelogFile="true"
-                 splitStatements="false"/>
-    </changeSet>
-    <changeSet id="create_trigger_calculate_age" author="milan s.">
-        <sqlFile path="ddl/create_trigger_calculate_age.sql" relativeToChangelogFile="true"
-                 splitStatements="false"/>
-    </changeSet>
-    <changeSet id="create_trigger_calculate_age_update" author="milan s.">
-        <sqlFile path="ddl/create_trigger_calculate_age_update.sql" relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
     <changeSet id="create_view_adult" author="milan s.">
