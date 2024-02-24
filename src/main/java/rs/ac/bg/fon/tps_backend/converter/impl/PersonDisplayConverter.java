@@ -21,11 +21,11 @@ public class PersonDisplayConverter implements DTOEntityConverter<PersonDisplayD
                 personDisplayDTO.ageInMonths(),
                 City.builder()
                         .name(personDisplayDTO.cityOfBirthName())
-                        .ptpbr(personDisplayDTO.cityOfBirthPTBR())
+                        .pptbr(personDisplayDTO.cityOfBirthPPTBR())
                         .build(),
                 City.builder()
                         .name(personDisplayDTO.cityOfResidenceName())
-                        .ptpbr(personDisplayDTO.cityOfResidencePTBR())
+                        .pptbr(personDisplayDTO.cityOfResidencePPTBR())
                         .build()
         );
     }
@@ -41,11 +41,11 @@ public class PersonDisplayConverter implements DTOEntityConverter<PersonDisplayD
                 person.getCityOfBirth() == null ?
                         null: person.getCityOfBirth().getName(),
                 person.getCityOfBirth() == null ?
-                        null: person.getCityOfBirth().getPtpbr(),
+                        null: person.getCityOfBirth().getPptbr(),
                 person.getCityOfResidence() == null ?
                         null: person.getCityOfResidence().getName(),
                 person.getCityOfResidence() == null ?
-                        null: person.getCityOfResidence().getPtpbr()
+                        null: person.getCityOfResidence().getPptbr()
         );
     }
 }

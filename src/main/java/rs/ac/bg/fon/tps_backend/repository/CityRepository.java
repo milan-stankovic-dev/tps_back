@@ -6,5 +6,5 @@ import rs.ac.bg.fon.tps_backend.domain.City;
 import java.util.Optional;
 
 public interface CityRepository extends JpaRepository<City, Long> {
-    Optional<City> findByPtpbr(int i);
+    Optional<City> findByPptbr(int i);
 }

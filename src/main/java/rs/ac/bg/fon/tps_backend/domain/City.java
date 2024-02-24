@@ -23,7 +23,7 @@ public class City {
     private Long id;
 
     @NaturalId
-    private int ptpbr;
+    private int pptbr;
 
     @NotNull
     @Size(min = 2, max = 30, message = "City name must be " +

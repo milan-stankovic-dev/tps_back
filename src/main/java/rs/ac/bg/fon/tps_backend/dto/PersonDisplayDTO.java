@@ -9,7 +9,7 @@ public record PersonDisplayDTO(
     LocalDate dOB,
     int ageInMonths,
     String cityOfBirthName,
-    int cityOfBirthPTBR,
+    int cityOfBirthPPTBR,
     String cityOfResidenceName,
-    int cityOfResidencePTBR
+    int cityOfResidencePPTBR
 ) { }

@@ -46,14 +46,14 @@ public class PersonServiceImpl implements PersonService {
         }
 
         final Optional<City> cityBirthDBOpt =
-                cityRepository.findByPtpbr(p.birthCityCode());
+                cityRepository.findByPptbr(p.birthCityCode());
 
         if(cityBirthDBOpt.isEmpty()){
             throw new UnknownCityException("Not a valid city of birth.");
         }
 
         final Optional<City> cityOfResidenceDBOpt =
-                cityRepository.findByPtpbr(p.residenceCityCode());
+                cityRepository.findByPptbr(p.residenceCityCode());
 
         if(cityOfResidenceDBOpt.isEmpty()){
             throw new UnknownCityException("Not a valid city of residence.");
@@ -95,7 +95,7 @@ public class PersonServiceImpl implements PersonService {
         final Person personFromDb = personDbOpt.get();
 
         final var cityBirthDbOpt =
-                cityRepository.findByPtpbr(p.birthCityCode());
+                cityRepository.findByPptbr(p.birthCityCode());
 
         if(cityBirthDbOpt.isEmpty()){
             throw new EntityNotFoundException("The city of birth does not exist.");
@@ -103,7 +103,7 @@ public class PersonServiceImpl implements PersonService {
         final City cityOfBirth = cityBirthDbOpt.get();
 
         final var cityResidenceDbOpt =
-                cityRepository.findByPtpbr(p.residenceCityCode());
+                cityRepository.findByPptbr(p.residenceCityCode());
 
         if(cityResidenceDbOpt.isEmpty()){
             throw new EntityNotFoundException("The city of residence does not exist.");

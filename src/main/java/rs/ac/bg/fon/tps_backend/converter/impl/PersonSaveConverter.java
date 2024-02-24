@@ -11,10 +11,10 @@ public class PersonSaveConverter implements DTOEntityConverter<PersonSaveDTO, Pe
     @Override
     public Person toEntity(PersonSaveDTO personSaveDTO) {
         final var cityOfBirth = City.builder()
-                .ptpbr(personSaveDTO.birthCityCode())
+                .pptbr(personSaveDTO.birthCityCode())
                 .build();
         final var cityOfResidence = City.builder()
-                .ptpbr(personSaveDTO.residenceCityCode())
+                .pptbr(personSaveDTO.residenceCityCode())
                 .build();
 
         return new Person(personSaveDTO.id(),
@@ -33,9 +33,9 @@ public class PersonSaveConverter implements DTOEntityConverter<PersonSaveDTO, Pe
                 person.getLastName(),
                 person.getDOB(),
                 person.getCityOfBirth() == null? null :
-                        person.getCityOfBirth().getPtpbr(),
+                        person.getCityOfBirth().getPptbr(),
                 person.getCityOfResidence() == null? null :
-                        person.getCityOfResidence().getPtpbr()
+                        person.getCityOfResidence().getPptbr()
         );
     }
 }
