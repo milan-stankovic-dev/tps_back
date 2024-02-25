@@ -40,5 +40,13 @@
         <sqlFile path="ddl/create_view_smederevci.sql"
                  relativeToChangelogFile="true"/>
     </changeSet>
+    <changeSet id="create_func_average_age_years" author="milan s.">
+        <sqlFile path="ddl/create_func_average_age_years.sql"
+                 relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="create_func_average_age" author="">
+        <sqlFile path="ddl/create_func_max_height.sql"
+                 relativeToChangelogFile="true"/>
+    </changeSet>
 
 </databaseChangeLog>
