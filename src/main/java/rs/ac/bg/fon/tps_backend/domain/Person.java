@@ -7,7 +7,6 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.cglib.core.Local;
 import rs.ac.bg.fon.tps_backend.annotation.YearRange;
 
 import java.time.LocalDate;

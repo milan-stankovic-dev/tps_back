@@ -44,9 +44,44 @@
         <sqlFile path="ddl/create_func_average_age_years.sql"
                  relativeToChangelogFile="true"/>
     </changeSet>
-    <changeSet id="create_func_average_age" author="">
+    <changeSet id="create_func_average_age" author="milan s.">
         <sqlFile path="ddl/create_func_max_height.sql"
                  relativeToChangelogFile="true"/>
+    </changeSet>
+    <changeSet id="create_func_select_person" author="milan s.">
+        <sqlFile path="ddl/create_func_select_person.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="create_func_select_person_by_id" author="milan s.">
+        <sqlFile path="ddl/create_func_select_person_by_id.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="create_proc_delete_person" author="milan s.">
+        <sqlFile path="ddl/create_proc_delete_person.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="create_proc_update_person" author="milan s.">
+        <sqlFile path="ddl/create_proc_update_person.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="create_func_select_city_id" author="milan s.">
+        <sqlFile path="ddl/create_func_select_city_id.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="create_func_select_city_pptbr" author="milan s.">
+        <sqlFile path="ddl/create_func_select_city_pptbr.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="create_proc_insert_person" author="milan s.">
+        <sqlFile path="ddl/create_proc_insert_person.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
     </changeSet>
 
 </databaseChangeLog>

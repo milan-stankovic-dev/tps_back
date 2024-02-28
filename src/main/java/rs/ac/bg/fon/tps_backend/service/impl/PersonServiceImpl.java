@@ -9,11 +9,11 @@ import rs.ac.bg.fon.tps_backend.domain.City;
 import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
-import rs.ac.bg.fon.tps_backend.exception.PersonNotInitializedException;
 import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
 import rs.ac.bg.fon.tps_backend.repository.CityRepository;
 import rs.ac.bg.fon.tps_backend.repository.PersonRepository;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
+import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
 import java.util.List;
 import java.util.Optional;
@@ -25,7 +25,6 @@ public class PersonServiceImpl implements PersonService {
     private final CityRepository cityRepository;
     private final PersonSaveConverter personSaveConverter;
     private final PersonDisplayConverter personDisplayConverter;
-
     @Override
     public List<PersonDisplayDTO> getAll() {
         return personDisplayConverter.listToDTO(
@@ -35,15 +34,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public PersonSaveDTO savePerson(PersonSaveDTO p) throws Exception {
-        if(p == null){
-            throw new PersonNotInitializedException("Your person may not be null.");
-        }
-
-        if(p.firstName() == null || p.lastName() == null ||
-            p.dOB() == null){
-            throw new PersonNotInitializedException("Your person may not contain" +
-                    " malformed fields.");
-        }
+        PersonValidator.validatePersonSaveDTO(p);
 
         final Optional<City> cityBirthDBOpt =
                 cityRepository.findByPptbr(p.birthCityCode());
@@ -80,12 +71,8 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public PersonSaveDTO updatePerson(PersonSaveDTO p) throws Exception {
-        if(p == null){
-            throw new PersonNotInitializedException("Your person may not be null.");
-        }
-        if(p.id() == null){
-            throw new PersonNotInitializedException("Your person's ID may not be null.");
-        }
+        PersonValidator.validatePersonSaveDTO(p);
+
         final var personDbOpt =
                 personRepository.findById(p.id());
 

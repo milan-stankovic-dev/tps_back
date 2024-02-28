@@ -3,6 +3,8 @@ package rs.ac.bg.fon.tps_backend.controller;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
@@ -12,10 +14,12 @@ import rs.ac.bg.fon.tps_backend.service.PersonService;
 import java.util.List;
 
 @RestController
-@RequiredArgsConstructor
+//@RequiredArgsConstructor
 @RequestMapping("/person")
 public class PersonController {
-    private final PersonService personService;
+    @Autowired
+    @Qualifier("personTemplateServiceImpl")
+    private PersonService personService;
 
     @GetMapping
     public ResponseEntity<List<PersonDisplayDTO>> getAll(){
