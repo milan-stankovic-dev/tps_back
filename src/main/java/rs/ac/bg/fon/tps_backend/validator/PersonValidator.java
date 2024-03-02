@@ -1,6 +1,7 @@
 package rs.ac.bg.fon.tps_backend.validator;
 
 import lombok.NonNull;
+import lombok.RequiredArgsConstructor;
 import lombok.experimental.UtilityClass;
 import lombok.val;
 import org.springframework.stereotype.Component;
@@ -14,8 +15,14 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-@UtilityClass
+@Component
+@RequiredArgsConstructor
 public class PersonValidator {
+    private final StringConverterUtil stringConverter;
+
+    public PersonValidator() {
+        this.stringConverter = new StringConverterUtil();
+    }
     private void validateForNull(PersonSaveDTO p) {
         if(p == null){
             throw new PersonNotInitializedException("Your person may not be null.");
@@ -39,7 +46,7 @@ public class PersonValidator {
                     " a lowercase letter.");
         }
 
-        val characterListOfString = StringConverterUtil
+        val characterListOfString = stringConverter
                 .stringToCharList(nameOrLastName);
 
         characterListOfString

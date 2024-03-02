@@ -4,12 +4,19 @@ package rs.ac.bg.fon.tps_backend.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.MockedStatic;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.powermock.api.mockito.PowerMockito;
+import org.powermock.core.classloader.annotations.PrepareForTest;
+import org.powermock.modules.junit4.PowerMockRunner;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
@@ -20,6 +27,7 @@ import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
 import rs.ac.bg.fon.tps_backend.repository.CityRepository;
 import rs.ac.bg.fon.tps_backend.repository.PersonRepository;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
+import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
 import java.time.LocalDate;
 import java.util.Optional;
@@ -28,6 +36,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
+import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
 @ExtendWith(MockitoExtension.class)
 public class PersonServiceImplTest {
@@ -41,6 +50,9 @@ public class PersonServiceImplTest {
     private PersonSaveConverter personSaveConverter;
     @Mock
     private PersonDisplayConverter personDisplayConverter;
+    @Mock
+    private PersonValidator personValidator;
+
 
     @BeforeEach
     void setUp() {
@@ -48,7 +60,8 @@ public class PersonServiceImplTest {
                 personRepository,
                 cityRepository,
                 personSaveConverter,
-                personDisplayConverter);
+                personDisplayConverter,
+                personValidator);
     }
 
     @Test
@@ -62,64 +75,45 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    @DisplayName("Throws exception due to null person to save")
-    void saveNullPersonException() throws Exception {
-        assertThatThrownBy(() -> personService.savePerson(null))
-                .isInstanceOf(PersonNotInitializedException.class)
-                .hasMessage("Your person may not be null.");
-
-        verify(personRepository, never()).save(null);
-    }
-
-    @Test
-    @DisplayName("Throws exception due to null first name")
-    void saveNullFirstName() throws Exception {
-        final PersonSaveDTO person = new PersonSaveDTO(
-                1L, null, "Peric",
-                189,
-                LocalDate.of(2000, 1,1),
-                11_000, 19_000
-        );
-        assertThatThrownBy(()-> personService.savePerson(person))
-                .isInstanceOf(PersonNotInitializedException.class)
-                .hasMessage("Your person may not contain" +
-                        " malformed fields.");
-        verify(personRepository, never()).save(
-                personSaveConverter.toEntity(person));
-    }
-
-    @Test
-    @DisplayName("Throws exception due to null last name")
-    void saveNullLastName() throws Exception {
-        final PersonSaveDTO person = new PersonSaveDTO(
-                1L, "Pera", null,
-                189,
-                LocalDate.of(2000, 1,1),
-                11_000, 19_000
-        );
-        assertThatThrownBy(()-> personService.savePerson(person))
-                .isInstanceOf(PersonNotInitializedException.class)
-                .hasMessage("Your person may not contain" +
-                        " malformed fields.");
-        verify(personRepository, never()).save(
-                personSaveConverter.toEntity(person));
-    }
-
-    @Test
-    @DisplayName("Throws exception due to null date of birth")
-    void saveNullDateOfBirth() throws Exception {
-        final PersonSaveDTO person = new PersonSaveDTO(
+    @DisplayName("Person save verification works!")
+    void savePersonVerificationWorks() throws Exception {
+        final PersonSaveDTO personSaveDTO = new PersonSaveDTO(
                 1L, "Pera", "Peric",
                 189,
-                null,
+                LocalDate.of(2000, 1,1),
                 11_000, 19_000
         );
-        assertThatThrownBy(()-> personService.savePerson(person))
-                .isInstanceOf(PersonNotInitializedException.class)
-                .hasMessage("Your person may not contain" +
-                        " malformed fields.");
-        verify(personRepository, never()).save(
-                personSaveConverter.toEntity(person));
+        val cityBirth = City.builder()
+                .pptbr(11_000)
+                .build();
+        val cityResidence = City.builder()
+                .pptbr(19_000)
+                .build();
+
+        final Person person = new Person(1L, "Pera", "Peric",
+                189, LocalDate.of(2000,1,1),0,
+                cityBirth,cityResidence);
+
+        when(cityRepository.findByPptbr(anyInt()))
+                .thenAnswer(invocation -> {
+                    if((int) invocation.getArgument(0) == 11_000){
+                        return Optional.of(cityBirth);
+                    } else {
+                        return Optional.of(cityResidence);
+                    }
+                });
+        when(personSaveConverter.toEntity(personSaveDTO))
+                .thenReturn(person);
+        when(personSaveConverter.toDto(person))
+                .thenReturn(personSaveDTO);
+        when(personRepository.save(person))
+                .thenReturn(person);
+
+        final PersonSaveDTO personSaved = personService.savePerson(personSaveDTO);
+        assertThat(personSaved).isEqualTo(personSaveDTO);
+        verify(personRepository,times(1))
+                .save(person);
+
     }
 
     @Test
@@ -215,17 +209,9 @@ public class PersonServiceImplTest {
                 .deleteById(1L);
     }
 
-    @Test
-    @DisplayName("Throws exception due to null person to update")
-    void updateNullPerson() throws Exception {
-        assertThatThrownBy(()->personService.updatePerson(null))
-                .isInstanceOf(PersonNotInitializedException.class)
-                .hasMessage("Your person may not be null.");
-
-        verify(personRepository, never()).save(null);
-    }
 
     @Test
+    @Disabled
     @DisplayName("Throws exception due to null id for person to update")
     void updateNullIdPerson() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(

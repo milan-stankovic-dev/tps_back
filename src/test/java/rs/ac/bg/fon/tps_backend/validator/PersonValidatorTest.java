@@ -1,9 +1,12 @@
 package rs.ac.bg.fon.tps_backend.validator;
 
+import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import lombok.val;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.ParameterizedTest;
 import org.junit.jupiter.params.aggregator.AggregateWith;
@@ -11,35 +14,48 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.aggregator.ArgumentsAggregationException;
 import org.junit.jupiter.params.aggregator.ArgumentsAggregator;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.junit.runner.RunWith;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.Spy;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.boot.test.context.SpringBootTest;
 import rs.ac.bg.fon.tps_backend.constraints.PersonConstraints;
 import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.PersonNotInitializedException;
+import rs.ac.bg.fon.tps_backend.util.DateConverterUtil;
+import rs.ac.bg.fon.tps_backend.util.StringConverterUtil;
 
+import java.text.DateFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.util.Arrays;
+import java.util.Date;
+import java.util.List;
 
-import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
-import static rs.ac.bg.fon.tps_backend.validator.PersonValidator.validateForSave;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static rs.ac.bg.fon.tps_backend.util.DateConverterUtil.stringToLocalDate;
 
+@ExtendWith(MockitoExtension.class)
 public class PersonValidatorTest {
+    @Spy
+    @InjectMocks
+    private final PersonValidator personValidator = new PersonValidator(new StringConverterUtil());
+    private final DateConverterUtil dateConverter = new DateConverterUtil();
     private final PersonConstraints constraints = new PersonConstraints(
             2,30,2,30,
             70, 260, LocalDate.of(1950, 1,1),
             LocalDate.of(2006,1,1));
+    @Mock
+    private StringConverterUtil stringConverter;
 
     @Test
     @DisplayName("Person null validation test")
     public void personIsNullTest() {
-        assertThatThrownBy(()->validateForSave(null))
+        assertThatThrownBy(()-> personValidator.validateForSave(null, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Your person may not be null.");
     }
@@ -50,7 +66,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, null, "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(()->validateForSave(person, constraints))
+        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Your person may not contain malformed fields.");
     }
@@ -61,7 +77,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", null,
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(()->validateForSave(person, constraints))
+        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Your person may not contain malformed fields.");
     }
@@ -72,7 +88,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "pera", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(()->validateForSave(person, constraints))
+        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's name or last name may not start with a lowercase letter.");
     }
@@ -83,7 +99,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pe ra", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(()->validateForSave(person, constraints))
+        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's name contains illegal characters.");
     }
@@ -94,7 +110,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pe7ra", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(()->validateForSave(person, constraints))
+        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's name contains illegal characters.");
     }
@@ -105,7 +121,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "PeRa", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(()->validateForSave(person, constraints))
+        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's name contains uppercase letters.");
     }
@@ -116,7 +132,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", "peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(()->validateForSave(person, constraints))
+        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's name or last name may not start with a lowercase letter.");
     }
@@ -127,7 +143,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", "P eric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(()->validateForSave(person, constraints))
+        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's name contains illegal characters.");
     }
@@ -138,7 +154,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", "Per6ic",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(()->validateForSave(person, constraints))
+        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's name contains illegal characters.");
     }
@@ -149,7 +165,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", "PerIc",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(()->validateForSave(person, constraints))
+        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's name contains uppercase letters.");
     }
@@ -160,7 +176,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(() -> validateForSave(person, null))
+        assertThatThrownBy(() -> personValidator.validateForSave(person, null))
                 .isInstanceOf(IllegalStateException.class)
                 .hasMessage("Constraints must be given for checking the person object.");
     }
@@ -171,7 +187,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "P", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(() -> validateForSave(person, constraints))
+        assertThatThrownBy(() -> personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's name length is invalid.");
     }
@@ -182,7 +198,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", "P",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(() -> validateForSave(person, constraints))
+        assertThatThrownBy(() -> personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's last name length is invalid.");
     }
@@ -193,7 +209,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Peraaaaaaaaaaaaaaaaaaaaaaaaaaaa", "P",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(() -> validateForSave(person, constraints))
+        assertThatThrownBy(() -> personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's name length is invalid.");
     }
@@ -204,7 +220,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", "Periccccccccccccccccccccccccccc",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(() -> validateForSave(person, constraints))
+        assertThatThrownBy(() -> personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's last name length is invalid.");
     }
@@ -215,7 +231,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 60, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(() -> validateForSave(person, constraints))
+        assertThatThrownBy(() -> personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's height is invalid.");
     }
@@ -226,7 +242,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 300, LocalDate.of(2000,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(() -> validateForSave(person, constraints))
+        assertThatThrownBy(() -> personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's height is invalid.");
     }
@@ -237,7 +253,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 190, LocalDate.of(1900,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(() -> validateForSave(person, constraints))
+        assertThatThrownBy(() -> personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's date of birth is invalid.");
     }
@@ -248,7 +264,7 @@ public class PersonValidatorTest {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 190, LocalDate.of(2100,1,1),
                 11_000, 11_000);
-        assertThatThrownBy(() -> validateForSave(person, constraints))
+        assertThatThrownBy(() -> personValidator.validateForSave(person, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Person's date of birth is invalid.");
     }
@@ -263,34 +279,40 @@ public class PersonValidatorTest {
     @DisplayName("Normal insert test {index}")
     public void normalInsertsCSV(@AggregateWith(PersonAggregator.class) PersonSaveDTO person) {
         assertDoesNotThrow(()->{
-           validateForSave(person, constraints);
+            personValidator.validateForSave(person, constraints);
         });
     }
 
     @Test
-    @Disabled
     @DisplayName("Testing the validity of the same named method with different signature.")
     public void fewerArgsMethodTest() {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 190, LocalDate.of(1990,1,1),
                 11_000, 11_000);
-        mockStatic(PersonValidator.class);
 
-        validateForSave(person);
+        personValidator.validateForSave(person);
 
-        verifyStatic(PersonValidator.class,times(1));
-        validateForSave(eq(person), any());
-
-        verifyNoMoreInteractions(PersonValidator.class);
+        verify(personValidator, times(1))
+                .validateForSave(person,constraints);
     }
 
     private static class PersonAggregator implements ArgumentsAggregator{
-
         @Override
         public Object aggregateArguments(ArgumentsAccessor acc, ParameterContext parameterContext) throws ArgumentsAggregationException {
+
+            final List<Integer> dateInfoNum = dateStringHelper(acc.getString(4));
+
             return new PersonSaveDTO(acc.getLong(0), acc.getString(1), acc.getString(2),
-                    acc.getInteger(3), stringToLocalDate(acc.getString(4)),
+                    acc.getInteger(3), LocalDate.of(
+                            dateInfoNum.get(0), dateInfoNum.get(1), dateInfoNum.get(2)),
                     acc.getInteger(5), acc.getInteger(6));
+        }
+        private List<Integer> dateStringHelper(String dateAsString) {
+            final String[] dateInfo = dateAsString.split("-");
+
+            return Arrays.stream(dateInfo)
+                    .map(Integer::parseInt)
+                    .toList();
         }
     }
 }

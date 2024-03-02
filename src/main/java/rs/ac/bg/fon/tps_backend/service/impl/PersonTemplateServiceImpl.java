@@ -25,6 +25,7 @@ public class PersonTemplateServiceImpl implements PersonService {
     private final PersonDisplayConverter personDisplayConverter;
     private final PersonRowMapper personRowMapper;
     private final CityRowMapper cityRowMapper;
+    private final PersonValidator personValidator;
 
     @Override
     public List<PersonDisplayDTO> getAll() {
@@ -36,7 +37,7 @@ public class PersonTemplateServiceImpl implements PersonService {
 
     private PersonSaveDTO savePerson(PersonSaveDTO p,
                                      UpdateQuery updateQuery) throws Exception{
-        PersonValidator.validateForSave(p);
+        personValidator.validateForSave(p);
 
         val cityOfBirthDB =
                 jdbcTemplate.queryForObject("SELECT * FROM select_city_by_pptbr(?)",

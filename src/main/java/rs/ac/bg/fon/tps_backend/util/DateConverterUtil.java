@@ -3,6 +3,7 @@ package rs.ac.bg.fon.tps_backend.util;
 import lombok.SneakyThrows;
 import lombok.experimental.UtilityClass;
 import lombok.val;
+import org.springframework.stereotype.Component;
 
 import java.text.DateFormat;
 import java.text.ParseException;
@@ -10,7 +11,7 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 
-@UtilityClass
+@Component
 public class DateConverterUtil {
     public LocalDate dateToLocalDate(Date date) {
         val year = date.getYear() + 1900;
@@ -28,12 +29,4 @@ public class DateConverterUtil {
         return LocalDate.of(year, month, day);
     }
 
-    @SneakyThrows(ParseException.class)
-    public LocalDate stringToLocalDate(String inputDate) {
-        final DateFormat simpleDateFormat =
-                new SimpleDateFormat("yyyy-MM-dd");
-        final Date helperDateVar = simpleDateFormat.parse(inputDate);
-
-        return dateToLocalDate(helperDateVar);
-    }
 }

@@ -17,6 +17,7 @@ import java.sql.SQLException;
 public class PersonRowMapper implements RowMapper<Person> {
 private final JdbcTemplate jdbcTemplate;
 private final CityRowMapper cityRowMapper;
+private final DateConverterUtil dateConverter;
     @Override
     public Person mapRow(ResultSet rs, int rowNum) throws SQLException {
 
@@ -37,7 +38,7 @@ private final CityRowMapper cityRowMapper;
                 .firstName(rs.getString("first_name"))
                 .lastName(rs.getString("last_name"))
                 .heightInCm(rs.getInt("height_in_cm"))
-                .dOB(DateConverterUtil.dateToLocalDate(
+                .dOB(dateConverter.dateToLocalDate(
                         rs.getDate("dob")))
                 .ageInMonths(rs.getInt("age_in_months"))
                 .cityOfBirth(cityOfBirth)

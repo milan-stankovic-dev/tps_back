@@ -27,6 +27,7 @@ public class PersonServiceImpl implements PersonService {
     private final CityRepository cityRepository;
     private final PersonSaveConverter personSaveConverter;
     private final PersonDisplayConverter personDisplayConverter;
+    private final PersonValidator personValidator;
     @Override
     public List<PersonDisplayDTO> getAll() {
         return personDisplayConverter.listToDTO(
@@ -36,7 +37,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public PersonSaveDTO savePerson(PersonSaveDTO p) throws Exception {
-        PersonValidator.validateForSave(p);
+        personValidator.validateForSave(p);
 
         final Optional<City> cityBirthDBOpt =
                 cityRepository.findByPptbr(p.birthCityCode());
@@ -54,7 +55,6 @@ public class PersonServiceImpl implements PersonService {
 
         final City cityOfBirth = cityBirthDBOpt.get();
         final City cityOfResidence = cityOfResidenceDBOpt.get();
-
         final Person personToSave = personSaveConverter.toEntity(p);
         personToSave.setCityOfBirth(cityOfBirth);
         personToSave.setCityOfResidence(cityOfResidence);
@@ -73,8 +73,8 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public PersonSaveDTO updatePerson(PersonSaveDTO p) throws Exception {
-        PersonValidator.validateForSave(p);
-        PersonValidator.validateUpdateId(p);
+        personValidator.validateForSave(p);
+        personValidator.validateUpdateId(p);
 
         final var personDbOpt =
                 personRepository.findById(p.id());
