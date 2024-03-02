@@ -113,7 +113,8 @@ public class PersonServiceImplTest {
         assertThat(personSaved).isEqualTo(personSaveDTO);
         verify(personRepository,times(1))
                 .save(person);
-
+        verify(personValidator, times(1))
+                .validateForSave(personSaveDTO);
     }
 
     @Test
@@ -133,7 +134,7 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    @DisplayName("Throws exception due to unknown city of birth")
+    @DisplayName("Throws exception due to unknown city of residence")
     void saveUnknownCityOfResidence() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
                 1L, "Pera", "Peric", 189,
@@ -151,44 +152,24 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    @DisplayName("Saves normally.")
-    void saveCityNormal() throws Exception {
+    @DisplayName("Invalid person passed to save")
+    void invalidPersonInputTest() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
-                1L, "Pera", "Peric", 189,
-                LocalDate.of(2000,1,1),
-                19_000, 11_000
-        );
-        final Person personForReturn = new Person(
-                1L, "Pera", "Peric",
+                1L, "P", "Peric",
                 189,
                 LocalDate.of(2000,1,1),
-                0,
-                City.builder()
-                        .pptbr(19_000)
-                        .build(),
-                City.builder()
-                        .pptbr(11_000)
-                        .build());
+                -1, 11_000
+        );
+        doThrow(new PersonNotInitializedException("Person's name length is invalid."))
+                .when(personValidator).validateForSave(person);
 
-        when(personSaveConverter.toEntity(person)).thenReturn(personForReturn);
-        when(personSaveConverter.toDto(personForReturn)).thenReturn(person);
-        when(cityRepository.findByPptbr(person.birthCityCode()))
-                .thenReturn(Optional.of(City.builder().pptbr(19_000).build()));
-        when(cityRepository.findByPptbr(person.residenceCityCode()))
-                .thenReturn(Optional.of(City.builder().pptbr(11_000).build()));
-        when(personRepository.save(personSaveConverter.toEntity(person)))
-                .thenReturn(personForReturn);
-
-        System.out.println("Before saving: " + person);
-
-        final PersonSaveDTO personSaved = personService.savePerson(person);
-
-        System.out.println("After saving: " + personSaved);
-
-        verify(personRepository, times(1)).save(
+        assertThatThrownBy(()-> personService.savePerson(person))
+                .isInstanceOf(PersonNotInitializedException.class)
+                .hasMessage("Person's name length is invalid.");
+        verify(personValidator, times(1))
+                .validateForSave(person);
+        verify(personRepository, never()).save(
                 personSaveConverter.toEntity(person));
-        assertThat(personSaved).isNotNull();
-        assertThat(personSaved).isEqualTo(person);
     }
 
 
@@ -211,45 +192,56 @@ public class PersonServiceImplTest {
 
 
     @Test
-    @Disabled
     @DisplayName("Throws exception due to null id for person to update")
     void updateNullIdPerson() throws Exception {
-        final PersonSaveDTO person = new PersonSaveDTO(
+        final PersonSaveDTO personSaveDTO = new PersonSaveDTO(
                 null, "Pera", "Peric", 189,
                 LocalDate.of(2000, 1, 1),
                 11_000, 19_000
         );
+        final Person person = new Person(
+                null, "Pera", "Peric", 189,
+                LocalDate.of(2000,1,1),0,
+                City.builder().pptbr(11_000).build(), City.builder().pptbr(19_0000).build()
+        );
 
-        ArgumentCaptor<Person> personCaptor =
-                ArgumentCaptor.forClass(Person.class);
+        doThrow(new PersonNotInitializedException("Your person's ID may not be null."))
+                .when(personValidator).validateUpdateId(personSaveDTO);
 
-        assertThatThrownBy(()->personService.updatePerson(person))
+        assertThatThrownBy(()->personService.updatePerson(personSaveDTO))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Your person's ID may not be null.");
 
-        verify(personRepository, never()).save(personCaptor.capture());
+        verify(personRepository, never()).save(person);
+        verify(personValidator, times(1))
+                .validateUpdateId(personSaveDTO);
     }
 
     @Test
     @DisplayName("Throws exception after trying to update non existing person")
     void updateNonExistingPerson() throws Exception {
-        final PersonSaveDTO person = new PersonSaveDTO(
+        final PersonSaveDTO personSaveDTO = new PersonSaveDTO(
                 5555L, "Pera", "Peric", 189,
                 LocalDate.of(2000, 1, 1),
                 11_000, 19_000
         );
+        final Person person = new Person(
+                null, "Pera", "Peric", 189,
+                LocalDate.of(2000,1,1),0,
+                City.builder().pptbr(11_000).build(), City.builder().pptbr(19_0000).build()
+        );
+        when(personSaveConverter.toEntity(personSaveDTO))
+                .thenReturn(person);
 
-//        when(cityRepository.findByPtpbr(person.birthCityCode()))
-//                .thenReturn(Optional.empty());
+        when(personRepository.findById(personSaveDTO.id()))
+                .thenReturn(Optional.empty());
 
-        ArgumentCaptor<Person> personCaptor =
-                ArgumentCaptor.forClass(Person.class);
-
-        assertThatThrownBy(()->personService.updatePerson(person))
+        assertThatThrownBy(() -> personService.updatePerson(personSaveDTO))
                 .isInstanceOf(EntityNotFoundException.class)
                 .hasMessage("The person with given ID may not exist.");
 
-        verify(personRepository, never()).save(personCaptor.capture());
+        verify(personRepository, never()).save(personSaveConverter
+                .toEntity(personSaveDTO));
     }
 
     @Test
@@ -299,42 +291,71 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    @DisplayName("Updates person successfully.")
-    void updateSuccessful() throws Exception {
+    @DisplayName("Invalid person passed to update")
+    void invalidPersonInputUpdateTest() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
-                1L, "Pera", "Peric", 189,
-                LocalDate.of(2000, 1, 1),
+                1L, "P", "Peric",
+                189,
+                LocalDate.of(2000,1,1),
+                -1, 11_000
+        );
+        doThrow(new PersonNotInitializedException("Person's name length is invalid."))
+                .when(personValidator).validateForSave(person);
+
+        assertThatThrownBy(()-> personService.updatePerson(person))
+                .isInstanceOf(PersonNotInitializedException.class)
+                .hasMessage("Person's name length is invalid.");
+        verify(personValidator, times(1))
+                .validateForSave(person);
+        verify(personRepository, never()).save(
+                personSaveConverter.toEntity(person));
+    }
+
+    @Test
+    @DisplayName("Updates person successfully!")
+    void updatePersonVerificationWorks() throws Exception {
+        final PersonSaveDTO personSaveDTO = new PersonSaveDTO(
+                1L, "Pera", "Peric",
+                189,
+                LocalDate.of(2000, 1,1),
                 11_000, 19_000
         );
-//
-//        when(personRepository.findById(person.id()))
-//                .thenReturn(Optional.of(new Person()));
-        when(cityRepository.findByPptbr(11_000))
-                .thenReturn(Optional.of(City.builder()
-                        .pptbr(11_000).build()));
-        when(cityRepository.findByPptbr(19_000))
-                .thenReturn(Optional.of(City.builder()
-                        .pptbr(19_000).build()));
-        when(personSaveConverter.toEntity(person))
-                .thenReturn(
-                    new Person(1L, "Pera", "Peric", 189,
-                            LocalDate.of(2000,1,1),
-                            0,
-                            City.builder().pptbr(11_000).build(),
-                            City.builder().pptbr(19_000).build())
-                );
+        val cityBirth = City.builder()
+                .pptbr(11_000)
+                .build();
+        val cityResidence = City.builder()
+                .pptbr(19_000)
+                .build();
 
-        ArgumentCaptor<Person> personCaptor =
-                ArgumentCaptor.forClass(Person.class);
+        final Person person = new Person(1L, "Pera", "Peric",
+                189, LocalDate.of(2000,1,1),0,
+                cityBirth,cityResidence);
 
-        personService.savePerson(person);
-//        final Person personCaptured = personCaptor.capture();
+        when(cityRepository.findByPptbr(anyInt()))
+                .thenAnswer(invocation -> {
+                    if((int) invocation.getArgument(0) == 11_000){
+                        return Optional.of(cityBirth);
+                    } else {
+                        return Optional.of(cityResidence);
+                    }
+                });
+        when(personSaveConverter.toEntity(personSaveDTO))
+                .thenReturn(person);
+        when(personSaveConverter.toDto(person))
+                .thenReturn(personSaveDTO);
+        when(personRepository.save(person))
+                .thenReturn(person);
+        when(personRepository.findById(personSaveDTO.id()))
+                .thenReturn(Optional.of(person));
 
-        verify(personRepository, times(1))
-                .save(personCaptor.capture());
+        final PersonSaveDTO personSaved = personService.updatePerson(personSaveDTO);
+        assertThat(personSaved).isEqualTo(personSaveDTO);
 
-//        assertThat(personCaptured).isEqualTo(
-//                personSaveConverter.toEntity(person));
-
+        verify(personRepository,times(1))
+                .save(person);
+        verify(personValidator, times(1))
+                .validateForSave(personSaveDTO);
+        verify(personValidator, times(1))
+                .validateUpdateId(personSaveDTO);
     }
 }
