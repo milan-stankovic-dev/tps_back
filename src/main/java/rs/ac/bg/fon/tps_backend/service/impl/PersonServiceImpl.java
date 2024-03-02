@@ -3,6 +3,7 @@ package rs.ac.bg.fon.tps_backend.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import rs.ac.bg.fon.tps_backend.constraints.PersonConstraints;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
@@ -15,6 +16,7 @@ import rs.ac.bg.fon.tps_backend.repository.PersonRepository;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -34,7 +36,7 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public PersonSaveDTO savePerson(PersonSaveDTO p) throws Exception {
-        PersonValidator.validatePersonSaveDTO(p);
+        PersonValidator.validateForSave(p);
 
         final Optional<City> cityBirthDBOpt =
                 cityRepository.findByPptbr(p.birthCityCode());
@@ -71,7 +73,8 @@ public class PersonServiceImpl implements PersonService {
 
     @Override
     public PersonSaveDTO updatePerson(PersonSaveDTO p) throws Exception {
-        PersonValidator.validatePersonSaveDTO(p);
+        PersonValidator.validateForSave(p);
+        PersonValidator.validateUpdateId(p);
 
         final var personDbOpt =
                 personRepository.findById(p.id());

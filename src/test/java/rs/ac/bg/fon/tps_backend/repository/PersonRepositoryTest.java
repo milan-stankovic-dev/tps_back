@@ -1,9 +1,14 @@
 package rs.ac.bg.fon.tps_backend.repository;
 
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
+import org.springframework.transaction.annotation.Propagation;
+import org.springframework.transaction.annotation.Transactional;
 import rs.ac.bg.fon.tps_backend.domain.City;
 import rs.ac.bg.fon.tps_backend.domain.Person;
 
@@ -12,6 +17,7 @@ import java.time.LocalDate;
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
+@Transactional(propagation = Propagation.NOT_SUPPORTED)
 public class PersonRepositoryTest {
     private static City city1;
     private static City city2;
@@ -20,6 +26,7 @@ public class PersonRepositoryTest {
     private PersonRepository personRepository;
     @Autowired
     private CityRepository cityRepository;
+
 
     @BeforeAll
     static void beforeAll() {
@@ -30,10 +37,18 @@ public class PersonRepositoryTest {
                 2L, 19_000, "Zajecar", 30_000
         );
         person = new Person(
-                1L, "Pera", "Peric", LocalDate.of(2000,1,1),
+                1L, "Pera", "Peric", 189,
+                LocalDate.of(2000,1,1),
                 0, city2, city1
         );
 
+    }
+
+    @AfterAll
+    static void afterAll() {
+        city1 = null;
+        city2 = null;
+        person = null;
     }
 
     @BeforeEach
@@ -52,16 +67,24 @@ public class PersonRepositoryTest {
     @Test
     @DisplayName("Normal case for saving a person to the db.")
     void saveTesting() {
-        final boolean exists = personRepository.existsById(1L);
+        val personDB = personRepository.save(person);
 
-        assertThat(exists).isTrue();
+        assertThat(personDB).isEqualTo(person);
     }
 
     @Test
     @DisplayName("Selecting from the database")
     void selectTesting() {
-        final var persons = personRepository.findAll();
+        val persons = personRepository.findAll();
 
         assertThat(persons).isNotEmpty().contains(person);
+    }
+
+    @Test
+    @DisplayName("Selecting by id")
+    void selectByIdTesting() {
+        val personDbOptional = personRepository.existsById(1L);
+
+        assertThat(personDbOptional).isTrue();
     }
 }

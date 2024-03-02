@@ -36,7 +36,7 @@ public class PersonTemplateServiceImpl implements PersonService {
 
     private PersonSaveDTO savePerson(PersonSaveDTO p,
                                      UpdateQuery updateQuery) throws Exception{
-        PersonValidator.validatePersonSaveDTO(p);
+        PersonValidator.validateForSave(p);
 
         val cityOfBirthDB =
                 jdbcTemplate.queryForObject("SELECT * FROM select_city_by_pptbr(?)",

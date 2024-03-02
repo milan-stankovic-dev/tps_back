@@ -2,6 +2,7 @@ package rs.ac.bg.fon.tps_backend.service.impl;
 
 
 import jakarta.persistence.EntityNotFoundException;
+import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -52,15 +53,18 @@ public class PersonServiceImplTest {
 
     @Test
     @DisplayName("Select all persons empty")
-    void selectAllStudentsEmpty() {
-        personService.getAll();
-        verify(personRepository).findAll();
+    void selectAllPersonsEmpty() {
+        val personList = personService.getAll();
+
+        assertThat(personList).isEmpty();
+        verify(personRepository,
+                times(1)).findAll();
     }
 
     @Test
     @DisplayName("Throws exception due to null person to save")
     void saveNullPersonException() throws Exception {
-        assertThatThrownBy(()->personService.savePerson(null))
+        assertThatThrownBy(() -> personService.savePerson(null))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Your person may not be null.");
 
@@ -72,6 +76,7 @@ public class PersonServiceImplTest {
     void saveNullFirstName() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
                 1L, null, "Peric",
+                189,
                 LocalDate.of(2000, 1,1),
                 11_000, 19_000
         );
@@ -88,6 +93,7 @@ public class PersonServiceImplTest {
     void saveNullLastName() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
                 1L, "Pera", null,
+                189,
                 LocalDate.of(2000, 1,1),
                 11_000, 19_000
         );
@@ -104,6 +110,7 @@ public class PersonServiceImplTest {
     void saveNullDateOfBirth() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
                 1L, "Pera", "Peric",
+                189,
                 null,
                 11_000, 19_000
         );
@@ -120,6 +127,7 @@ public class PersonServiceImplTest {
     void saveUnknownCityOfBirth() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
                 1L, "Pera", "Peric",
+                    189,
                     LocalDate.of(2000,1,1),
                 -1, 11_000
         );
@@ -134,11 +142,11 @@ public class PersonServiceImplTest {
     @DisplayName("Throws exception due to unknown city of birth")
     void saveUnknownCityOfResidence() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
-                1L, "Pera", "Peric",
+                1L, "Pera", "Peric", 189,
                 LocalDate.of(2000,1,1),
                 19_000, -1
         );
-        when(cityRepository.findByPtpbr(person.birthCityCode()))
+        when(cityRepository.findByPptbr(person.birthCityCode()))
                 .thenReturn(Optional.of(new City()));
 
         assertThatThrownBy(()-> personService.savePerson(person))
@@ -152,31 +160,43 @@ public class PersonServiceImplTest {
     @DisplayName("Saves normally.")
     void saveCityNormal() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
-                1L, "Pera", "Peric",
+                1L, "Pera", "Peric", 189,
                 LocalDate.of(2000,1,1),
                 19_000, 11_000
         );
-        when(personSaveConverter.toEntity(person)).thenReturn(
-                new Person(
-                        1L, "Pera", "Peric",
-                        LocalDate.of(2000,1,1),
-                        0,
-                        City.builder()
-                                .ptpbr(19_000)
-                                .build(),
-                        City.builder()
-                                .ptpbr(11_000)
-                                .build()));
-        when(cityRepository.findByPtpbr(person.birthCityCode()))
-                .thenReturn(Optional.of(new City()));
-        when(cityRepository.findByPtpbr(person.residenceCityCode()))
-                .thenReturn(Optional.of(new City()));
+        final Person personForReturn = new Person(
+                1L, "Pera", "Peric",
+                189,
+                LocalDate.of(2000,1,1),
+                0,
+                City.builder()
+                        .pptbr(19_000)
+                        .build(),
+                City.builder()
+                        .pptbr(11_000)
+                        .build());
 
-        personService.savePerson(person);
+        when(personSaveConverter.toEntity(person)).thenReturn(personForReturn);
+        when(personSaveConverter.toDto(personForReturn)).thenReturn(person);
+        when(cityRepository.findByPptbr(person.birthCityCode()))
+                .thenReturn(Optional.of(City.builder().pptbr(19_000).build()));
+        when(cityRepository.findByPptbr(person.residenceCityCode()))
+                .thenReturn(Optional.of(City.builder().pptbr(11_000).build()));
+        when(personRepository.save(personSaveConverter.toEntity(person)))
+                .thenReturn(personForReturn);
+
+        System.out.println("Before saving: " + person);
+
+        final PersonSaveDTO personSaved = personService.savePerson(person);
+
+        System.out.println("After saving: " + personSaved);
 
         verify(personRepository, times(1)).save(
                 personSaveConverter.toEntity(person));
+        assertThat(personSaved).isNotNull();
+        assertThat(personSaved).isEqualTo(person);
     }
+
 
     @Test
     @DisplayName("Delete person null")
@@ -209,7 +229,7 @@ public class PersonServiceImplTest {
     @DisplayName("Throws exception due to null id for person to update")
     void updateNullIdPerson() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
-                null, "Pera", "Peric",
+                null, "Pera", "Peric", 189,
                 LocalDate.of(2000, 1, 1),
                 11_000, 19_000
         );
@@ -228,7 +248,7 @@ public class PersonServiceImplTest {
     @DisplayName("Throws exception after trying to update non existing person")
     void updateNonExistingPerson() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
-                5555L, "Pera", "Peric",
+                5555L, "Pera", "Peric", 189,
                 LocalDate.of(2000, 1, 1),
                 11_000, 19_000
         );
@@ -250,7 +270,7 @@ public class PersonServiceImplTest {
     @DisplayName("Throws exception due to unknown city of birth")
     void updateUnknownCityOfBirth() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
-                1L, "Pera", "Peric",
+                1L, "Pera", "Peric", 189,
                 LocalDate.of(2000, 1, 1),
                 11_000, 19_000
         );
@@ -272,14 +292,14 @@ public class PersonServiceImplTest {
     @DisplayName("Throws exception due to unknown city of residence")
     void updateUnknownCityOfResidence() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
-                1L, "Pera", "Peric",
+                1L, "Pera", "Peric", 189,
                 LocalDate.of(2000, 1, 1),
                 11_000, 19_000
         );
 
         when(personRepository.findById(person.id()))
                 .thenReturn(Optional.of(new Person()));
-        when(cityRepository.findByPtpbr(11_000))
+        when(cityRepository.findByPptbr(11_000))
                 .thenReturn(Optional.of(new City()));
 
         ArgumentCaptor<Person> personCaptor =
@@ -296,26 +316,26 @@ public class PersonServiceImplTest {
     @DisplayName("Updates person successfully.")
     void updateSuccessful() throws Exception {
         final PersonSaveDTO person = new PersonSaveDTO(
-                1L, "Pera", "Peric",
+                1L, "Pera", "Peric", 189,
                 LocalDate.of(2000, 1, 1),
                 11_000, 19_000
         );
 //
 //        when(personRepository.findById(person.id()))
 //                .thenReturn(Optional.of(new Person()));
-        when(cityRepository.findByPtpbr(11_000))
+        when(cityRepository.findByPptbr(11_000))
                 .thenReturn(Optional.of(City.builder()
-                        .ptpbr(11_000).build()));
-        when(cityRepository.findByPtpbr(19_000))
+                        .pptbr(11_000).build()));
+        when(cityRepository.findByPptbr(19_000))
                 .thenReturn(Optional.of(City.builder()
-                        .ptpbr(19_000).build()));
+                        .pptbr(19_000).build()));
         when(personSaveConverter.toEntity(person))
                 .thenReturn(
-                    new Person(1L, "Pera", "Peric",
+                    new Person(1L, "Pera", "Peric", 189,
                             LocalDate.of(2000,1,1),
                             0,
-                            City.builder().ptpbr(11_000).build(),
-                            City.builder().ptpbr(19_000).build())
+                            City.builder().pptbr(11_000).build(),
+                            City.builder().pptbr(19_000).build())
                 );
 
         ArgumentCaptor<Person> personCaptor =
