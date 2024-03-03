@@ -18,7 +18,7 @@ import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 import java.util.List;
 import java.util.Optional;
 
-@Service
+@Service("personServiceImpl")
 @RequiredArgsConstructor
 public class PersonServiceImpl implements PersonService {
     private final PersonRepository personRepository;
@@ -74,6 +74,9 @@ public class PersonServiceImpl implements PersonService {
     public void deletePerson(Long id) throws Exception {
         if(id == null){
             throw new NullPointerException("Your id may not be null.");
+        }
+        if(!personRepository.existsById(id)){
+            throw new EntityNotFoundException("Person with said id does not exist.");
         }
         personRepository.deleteById(id);
     }

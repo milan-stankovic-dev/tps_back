@@ -185,7 +185,10 @@ public class PersonServiceImplTest {
     @Test
     @DisplayName("Delete person non null")
     void deletePerson() throws Exception {
+        when(personRepository.existsById(1L))
+                .thenReturn(true);
         personService.deletePerson(1L);
+
         verify(personRepository, times(1))
                 .deleteById(1L);
     }

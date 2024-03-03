@@ -18,7 +18,7 @@ import rs.ac.bg.fon.tps_backend.mapper.CityRowMapper;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
 import java.util.List;
-@Service
+@Service("personTemplateServiceImpl")
 @RequiredArgsConstructor
 public class PersonTemplateServiceImpl implements PersonService {
     private final JdbcTemplate jdbcTemplate;

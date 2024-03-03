@@ -17,9 +17,13 @@ import java.util.List;
 //@RequiredArgsConstructor
 @RequestMapping("/person")
 public class PersonController {
+
+    private final PersonService personService;
+
     @Autowired
-    @Qualifier("personTemplateServiceImpl")
-    private PersonService personService;
+    public PersonController(@Qualifier("personServiceImpl") PersonService personService) {
+        this.personService = personService;
+    }
 
     @GetMapping
     public ResponseEntity<List<PersonDisplayDTO>> getAll(){
