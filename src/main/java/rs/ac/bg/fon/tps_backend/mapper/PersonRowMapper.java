@@ -19,6 +19,9 @@ private final CityRowMapper cityRowMapper;
 private final DateConverterUtil dateConverter;
     @Override
     public Person mapRow(ResultSet rs, int rowNum) throws SQLException {
+        if(rs == null) {
+            throw new IllegalArgumentException("Result set may not be null.");
+        }
 
         val cityOfBirth = jdbcTemplate.queryForObject(
                 "SELECT * FROM select_city_by_id(?)",

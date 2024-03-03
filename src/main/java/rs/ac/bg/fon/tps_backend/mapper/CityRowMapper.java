@@ -11,6 +11,9 @@ import java.sql.SQLException;
 public class CityRowMapper implements RowMapper<City> {
     @Override
     public City mapRow(ResultSet rs, int rowNum) throws SQLException {
+        if(rs == null) {
+            throw new IllegalArgumentException("Result set may not be null.");
+        }
         return City.builder()
                 .id(rs.getLong("id"))
                 .pptbr(rs.getInt("pptbr"))
