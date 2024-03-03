@@ -1,8 +1,5 @@
 package rs.ac.bg.fon.tps_backend.repository;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.PersistenceContext;
-import lombok.RequiredArgsConstructor;
 import lombok.val;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;

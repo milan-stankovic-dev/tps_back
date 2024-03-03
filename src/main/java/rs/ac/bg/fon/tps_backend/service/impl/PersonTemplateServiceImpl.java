@@ -7,13 +7,14 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
+import rs.ac.bg.fon.tps_backend.domain.City;
 import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
 import rs.ac.bg.fon.tps_backend.lambda.UpdateQuery;
 import rs.ac.bg.fon.tps_backend.mapper.PersonRowMapper;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
-import rs.ac.bg.fon.tps_backend.validator.CityRowMapper;
+import rs.ac.bg.fon.tps_backend.mapper.CityRowMapper;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
 import java.util.List;
@@ -35,27 +36,26 @@ public class PersonTemplateServiceImpl implements PersonService {
         );
     }
 
+    private City fetchCityIfPossible(int cityCode) {
+        val cityDB =
+                jdbcTemplate.queryForObject("SELECT * FROM select_city_by_pptbr(?)",
+                        cityRowMapper, cityCode);
+
+        if(cityDB == null) {
+            throw new UnknownCityException("Person contains reference to unknown city.");
+        }
+
+        return cityDB;
+    }
+
     private PersonSaveDTO savePerson(PersonSaveDTO p,
                                      UpdateQuery updateQuery) throws Exception{
         personValidator.validateForSave(p);
 
-        val cityOfBirthDB =
-                jdbcTemplate.queryForObject("SELECT * FROM select_city_by_pptbr(?)",
-                        cityRowMapper, p.birthCityCode());
-
-        if(cityOfBirthDB == null) {
-            throw new UnknownCityException("Not a valid city of birth.");
-        }
-
-        val cityOfResidenceDB =
-                jdbcTemplate.queryForObject("SELECT * FROM select_city_by_pptbr(?)",
-                        cityRowMapper, p.residenceCityCode());
-
-        if(cityOfResidenceDB == null) {
-            throw new UnknownCityException("Not a valid city of residence.");
-        }
-
+        val cityOfBirthDB = fetchCityIfPossible(p.birthCityCode());
+        val cityOfResidenceDB = fetchCityIfPossible(p.residenceCityCode());
         val personToSave = personSaveConverter.toEntity(p);
+
         personToSave.setCityOfBirth(cityOfBirthDB);
         personToSave.setCityOfResidence(cityOfResidenceDB);
 
@@ -65,6 +65,8 @@ public class PersonTemplateServiceImpl implements PersonService {
                 personToSave
         );
     }
+
+
 
     @Override
     public PersonSaveDTO savePerson(PersonSaveDTO p) throws Exception {
@@ -108,7 +110,7 @@ public class PersonTemplateServiceImpl implements PersonService {
                 "SELECT * FROM select_person_by_id(?)",
                  personRowMapper, id);
 
-        if(personDB == null){
+        if(personDB == null) {
             throw new EntityNotFoundException("Person with given id does not exist");
         }
 

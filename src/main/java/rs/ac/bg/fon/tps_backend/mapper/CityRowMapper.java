@@ -1,4 +1,4 @@
-package rs.ac.bg.fon.tps_backend.validator;
+package rs.ac.bg.fon.tps_backend.mapper;
 
 import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;

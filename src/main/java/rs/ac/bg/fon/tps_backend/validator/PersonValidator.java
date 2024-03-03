@@ -2,27 +2,19 @@ package rs.ac.bg.fon.tps_backend.validator;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
-import lombok.experimental.UtilityClass;
 import lombok.val;
 import org.springframework.stereotype.Component;
-import rs.ac.bg.fon.tps_backend.constraints.PersonConstraints;
+import rs.ac.bg.fon.tps_backend.constants.PersonConstraintsConstants;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.PersonNotInitializedException;
 import rs.ac.bg.fon.tps_backend.util.StringConverterUtil;
-
-import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 @Component
 @RequiredArgsConstructor
 public class PersonValidator {
     private final StringConverterUtil stringConverter;
+    private final PersonConstraintsConstants constants;
 
-    public PersonValidator() {
-        this.stringConverter = new StringConverterUtil();
-    }
     private void validateForNull(PersonSaveDTO p) {
         if(p == null){
             throw new PersonNotInitializedException("Your person may not be null.");
@@ -63,39 +55,37 @@ public class PersonValidator {
                 });
     }
 
-    private void validateConstraints(PersonSaveDTO person, @NonNull PersonConstraints constraints) {
+    private void validateConstraints(PersonSaveDTO person, @NonNull PersonConstraintsConstants constraints) {
         if(constraints == null) {
             throw new IllegalStateException("Constraints must be given for checking the person object.");
         }
 
-        if(person.firstName().length() > constraints.firstNameMaxLen() ||
-            person.firstName().length() < constraints.firstNameMinLen()) {
+        if(person.firstName().length() > constraints.getFIRST_NAME_MAX_LENGTH() ||
+            person.firstName().length() < constraints.getFIRST_NAME_MIN_LENGTH()) {
             throw new PersonNotInitializedException("Person's name length is invalid.");
         }
 
-        if(person.lastName().length() > constraints.lastNameMaxLen() ||
-                person.lastName().length() < constraints.lastNameMinLen()) {
+        if(person.lastName().length() > constraints.getLAST_NAME_MAX_LENGTH() ||
+                person.lastName().length() < constraints.getLAST_NAME_MIN_LENGTH()) {
             throw new PersonNotInitializedException("Person's last name length is invalid.");
         }
 
-        if(person.heightInCm() > constraints.heightInCmMax() ||
-            person.heightInCm() < constraints.heightInCmMin()) {
+        if(person.heightInCm() > constraints.getHEIGHT_IN_CM_MAX() ||
+            person.heightInCm() < constraints.getHEIGHT_IN_CM_MIN()) {
             throw new PersonNotInitializedException("Person's height is invalid.");
         }
 
-        if(person.dOB().isAfter(constraints.latestDOB()) ||
-            person.dOB().isBefore(constraints.earliestDOB())) {
+        if(person.dOB().getYear() > constraints.getDOB_LATEST_YEAR() ||
+            person.dOB().getYear() < constraints.getDOB_EARLIEST_YEAR()) {
             throw new PersonNotInitializedException("Person's date of birth is invalid.");
         }
     }
 
     public void validateForSave(PersonSaveDTO person) {
-        validateForSave(person, new PersonConstraints(
-                2,30,2,30,
-                70, 260, LocalDate.of(1950, 1,1),
-                LocalDate.of(2006,1,1)));
+        validateForSave(person, constants);
     }
-    public void validateForSave(PersonSaveDTO person, PersonConstraints constraints) {
+
+    public void validateForSave(PersonSaveDTO person, PersonConstraintsConstants constraints) {
         validateForNull(person);
         validateConstraints(person, constraints);
         validateNameFormat(person.firstName());

@@ -1,11 +1,7 @@
 package rs.ac.bg.fon.tps_backend.validator;
 
-import lombok.RequiredArgsConstructor;
-import lombok.SneakyThrows;
 import lombok.val;
-import org.junit.jupiter.api.Disabled;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.junit.jupiter.api.extension.ParameterContext;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -14,24 +10,17 @@ import org.junit.jupiter.params.aggregator.ArgumentsAccessor;
 import org.junit.jupiter.params.aggregator.ArgumentsAggregationException;
 import org.junit.jupiter.params.aggregator.ArgumentsAggregator;
 import org.junit.jupiter.params.provider.CsvSource;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.boot.test.context.SpringBootTest;
-import rs.ac.bg.fon.tps_backend.constraints.PersonConstraints;
-import rs.ac.bg.fon.tps_backend.domain.Person;
+import rs.ac.bg.fon.tps_backend.constants.PersonConstraintsConstants;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.PersonNotInitializedException;
-import rs.ac.bg.fon.tps_backend.util.DateConverterUtil;
+import rs.ac.bg.fon.tps_backend.util.PropertyUtil;
 import rs.ac.bg.fon.tps_backend.util.StringConverterUtil;
 
-import java.text.DateFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.Arrays;
-import java.util.Date;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
@@ -41,16 +30,27 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
 public class PersonValidatorTest {
+
     @Spy
-    @InjectMocks
-    private final PersonValidator personValidator = new PersonValidator(new StringConverterUtil());
-    private final DateConverterUtil dateConverter = new DateConverterUtil();
-    private final PersonConstraints constraints = new PersonConstraints(
-            2,30,2,30,
-            70, 260, LocalDate.of(1950, 1,1),
-            LocalDate.of(2006,1,1));
-    @Mock
-    private StringConverterUtil stringConverter;
+    private static PersonValidator personValidator;
+
+    private static PersonConstraintsConstants constraints ;
+
+    @BeforeAll
+    static void beforeAll() {
+        try {
+            constraints = new PersonConstraintsConstants (new PropertyUtil());
+            personValidator = new PersonValidator(new StringConverterUtil(),constraints);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @AfterAll
+    static void afterAll() {
+        constraints = null;
+        personValidator = null;
+    }
 
     @Test
     @DisplayName("Person null validation test")

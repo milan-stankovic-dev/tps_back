@@ -7,7 +7,6 @@ import org.springframework.jdbc.core.RowMapper;
 import org.springframework.stereotype.Component;
 import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.util.DateConverterUtil;
-import rs.ac.bg.fon.tps_backend.validator.CityRowMapper;
 
 import java.sql.ResultSet;
 import java.sql.SQLException;

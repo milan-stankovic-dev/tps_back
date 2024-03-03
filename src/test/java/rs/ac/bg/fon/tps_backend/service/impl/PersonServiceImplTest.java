@@ -128,7 +128,7 @@ public class PersonServiceImplTest {
         );
         assertThatThrownBy(()-> personService.savePerson(person))
                 .isInstanceOf(UnknownCityException.class)
-                .hasMessage("Not a valid city of birth.");
+                .hasMessage("Person contains reference to unknown city.");
         verify(personRepository, never()).save(
                 personSaveConverter.toEntity(person));
     }
@@ -146,7 +146,7 @@ public class PersonServiceImplTest {
 
         assertThatThrownBy(()-> personService.savePerson(person))
                 .isInstanceOf(UnknownCityException.class)
-                .hasMessage("Not a valid city of residence.");
+                .hasMessage("Person contains reference to unknown city.");
         verify(personRepository, never()).save(
                 personSaveConverter.toEntity(person));
     }
@@ -260,8 +260,8 @@ public class PersonServiceImplTest {
                 ArgumentCaptor.forClass(Person.class);
 
         assertThatThrownBy(()->personService.updatePerson(person))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("The city of birth does not exist.");
+                .isInstanceOf(UnknownCityException.class)
+                .hasMessage("Person contains reference to unknown city.");
 
         verify(personRepository, never()).save(personCaptor.capture());
     }
@@ -284,8 +284,8 @@ public class PersonServiceImplTest {
                 ArgumentCaptor.forClass(Person.class);
 
         assertThatThrownBy(()->personService.updatePerson(person))
-                .isInstanceOf(EntityNotFoundException.class)
-                .hasMessage("The city of residence does not exist.");
+                .isInstanceOf(UnknownCityException.class)
+                .hasMessage("Person contains reference to unknown city.");
 
         verify(personRepository, never()).save(personCaptor.capture());
     }

@@ -3,7 +3,6 @@ package rs.ac.bg.fon.tps_backend.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
-import rs.ac.bg.fon.tps_backend.constraints.PersonConstraints;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
@@ -16,7 +15,6 @@ import rs.ac.bg.fon.tps_backend.repository.PersonRepository;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
-import java.time.LocalDate;
 import java.util.List;
 import java.util.Optional;
 
@@ -39,28 +37,37 @@ public class PersonServiceImpl implements PersonService {
     public PersonSaveDTO savePerson(PersonSaveDTO p) throws Exception {
         personValidator.validateForSave(p);
 
-        final Optional<City> cityBirthDBOpt =
-                cityRepository.findByPptbr(p.birthCityCode());
-
-        if(cityBirthDBOpt.isEmpty()){
-            throw new UnknownCityException("Not a valid city of birth.");
-        }
-
-        final Optional<City> cityOfResidenceDBOpt =
-                cityRepository.findByPptbr(p.residenceCityCode());
-
-        if(cityOfResidenceDBOpt.isEmpty()){
-            throw new UnknownCityException("Not a valid city of residence.");
-        }
-
-        final City cityOfBirth = cityBirthDBOpt.get();
-        final City cityOfResidence = cityOfResidenceDBOpt.get();
+        final City cityOfBirth = fetchCityIfPossible(p.birthCityCode());
+        final City cityOfResidence = fetchCityIfPossible(p.residenceCityCode());
         final Person personToSave = personSaveConverter.toEntity(p);
+
         personToSave.setCityOfBirth(cityOfBirth);
         personToSave.setCityOfResidence(cityOfResidence);
 
         return personSaveConverter
                 .toDto(personRepository.save(personToSave));
+    }
+
+    private City fetchCityIfPossible(int cityCode){
+        final Optional<City> cityDBOpt =
+                cityRepository.findByPptbr(cityCode);
+
+        if(cityDBOpt.isEmpty()){
+            throw new UnknownCityException("Person contains reference to unknown city.");
+        }
+
+        return cityDBOpt.get();
+    }
+
+    private Person fetchPersonIfPossible(Long id){
+        final var personDbOpt =
+                personRepository.findById(id);
+
+        if(personDbOpt.isEmpty()){
+            throw new EntityNotFoundException("The person with given ID may not exist.");
+        }
+
+        return personDbOpt.get();
     }
 
     @Override
@@ -76,29 +83,10 @@ public class PersonServiceImpl implements PersonService {
         personValidator.validateForSave(p);
         personValidator.validateUpdateId(p);
 
-        final var personDbOpt =
-                personRepository.findById(p.id());
+        final Person personFromDb = fetchPersonIfPossible(p.id());
+        final City cityOfBirth = fetchCityIfPossible(p.birthCityCode());
+        final City cityOfResidence = fetchCityIfPossible(p.residenceCityCode());
 
-        if(personDbOpt.isEmpty()){
-            throw new EntityNotFoundException("The person with given ID may not exist.");
-        }
-        final Person personFromDb = personDbOpt.get();
-
-        final var cityBirthDbOpt =
-                cityRepository.findByPptbr(p.birthCityCode());
-
-        if(cityBirthDbOpt.isEmpty()){
-            throw new EntityNotFoundException("The city of birth does not exist.");
-        }
-        final City cityOfBirth = cityBirthDbOpt.get();
-
-        final var cityResidenceDbOpt =
-                cityRepository.findByPptbr(p.residenceCityCode());
-
-        if(cityResidenceDbOpt.isEmpty()){
-            throw new EntityNotFoundException("The city of residence does not exist.");
-        }
-        final City cityOfResidence = cityResidenceDbOpt.get();
         final Person personToSave =
                 personSaveConverter.toEntity(p);
 
