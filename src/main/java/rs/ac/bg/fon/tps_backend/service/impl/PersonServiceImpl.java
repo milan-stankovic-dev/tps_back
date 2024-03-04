@@ -36,6 +36,7 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public PersonSaveDTO savePerson(PersonSaveDTO p) throws Exception {
         personValidator.validateForSave(p);
+        personValidator.setLastNameToJovanovicDefault(p);
 
         final City cityOfBirth = fetchCityIfPossible(p.birthCityCode());
         final City cityOfResidence = fetchCityIfPossible(p.residenceCityCode());
@@ -85,6 +86,7 @@ public class PersonServiceImpl implements PersonService {
     public PersonSaveDTO updatePerson(PersonSaveDTO p) throws Exception {
         personValidator.validateForSave(p);
         personValidator.validateUpdateId(p);
+        personValidator.setLastNameToJovanovicDefault(p);
 
         final Person personFromDb = fetchPersonIfPossible(p.id());
         final City cityOfBirth = fetchCityIfPossible(p.birthCityCode());

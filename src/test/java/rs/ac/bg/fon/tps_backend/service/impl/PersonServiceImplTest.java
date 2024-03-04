@@ -17,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.beans.factory.annotation.Qualifier;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
@@ -45,6 +46,7 @@ public class PersonServiceImplTest {
     @Mock
     private CityRepository cityRepository;
     @Mock
+    @Qualifier("personServiceImpl")
     private PersonService personService;
     @Mock
     private PersonSaveConverter personSaveConverter;
@@ -75,7 +77,7 @@ public class PersonServiceImplTest {
     }
 
     @Test
-    @DisplayName("Person save verification works!")
+    @DisplayName("Saves person successfully!")
     void savePersonVerificationWorks() throws Exception {
         final PersonSaveDTO personSaveDTO = new PersonSaveDTO(
                 1L, "Pera", "Peric",

@@ -23,6 +23,7 @@ import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.List;
 
+import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
 import static org.powermock.api.mockito.PowerMockito.verifyStatic;
@@ -64,17 +65,6 @@ public class PersonValidatorTest {
     @DisplayName("Person first name null validation test")
     public void personsNameIsNullTest() {
         val person = new PersonSaveDTO(1L, null, "Peric",
-                190, LocalDate.of(2000,1,1),
-                11_000, 11_000);
-        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
-                .isInstanceOf(PersonNotInitializedException.class)
-                .hasMessage("Your person may not contain malformed fields.");
-    }
-
-    @Test
-    @DisplayName("Person last name null validation test")
-    public void personsLastNameIsNullTest() {
-        val person = new PersonSaveDTO(1L, "Pera", null,
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
         assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
@@ -281,6 +271,69 @@ public class PersonValidatorTest {
         assertDoesNotThrow(()->{
             personValidator.validateForSave(person, constraints);
         });
+    }
+
+    @Test
+    @DisplayName("Person last name null validation test")
+    public void personsLastNameIsNullTest() {
+        val person = new PersonSaveDTO(1L, "Pera", null,
+                190, LocalDate.of(2000,1,1),
+                11_000, 11_000);
+        assertDoesNotThrow(()->personValidator.validateForSave(person, constraints));
+    }
+
+    @Test
+    @DisplayName("Person last name blank validation test")
+    public void personsLastNameIsBlankTest() {
+        val person = new PersonSaveDTO(1L, "Pera", "",
+                190, LocalDate.of(2000,1,1),
+                11_000, 11_000);
+        assertDoesNotThrow(()->personValidator.validateForSave(person, constraints));
+    }
+
+    @Test
+    @DisplayName("Setting last name to Jovanović test")
+    public void setToJovanovicConditionNotMetTest() {
+        val person = new PersonSaveDTO(1L, "Pera", "Perić",
+                190, LocalDate.of(2000,1,1),
+                11_000, 11_000);
+        val personConverted = personValidator
+                .setLastNameToJovanovicDefault(person);
+
+        assertThat(person)
+                .isEqualTo(personConverted);
+    }
+
+    @ParameterizedTest
+    @CsvSource(value = {
+            "-",
+            "''"
+    }, nullValues = "-")
+    @DisplayName("Setting last name to Jovanović test")
+    public void setToJovanovicLastName(String lastName) {
+        val person = new PersonSaveDTO(1L, "Pera", lastName,
+                190, LocalDate.of(2000,1,1),
+                11_000, 11_000);
+        val personConverted = personValidator
+                .setLastNameToJovanovicDefault(person);
+
+        assertThat(person.id())
+                .isEqualTo(personConverted.id());
+        assertThat(person.firstName())
+                .isEqualTo(personConverted.firstName());
+        assertThat(person.heightInCm())
+                .isEqualTo(personConverted.heightInCm());
+        assertThat(person.dOB())
+                .isEqualTo(personConverted.dOB());
+        assertThat(person.birthCityCode())
+                .isEqualTo(personConverted.birthCityCode());
+        assertThat(person.residenceCityCode())
+                .isEqualTo(personConverted.residenceCityCode());
+
+
+        assertThat(personConverted.lastName())
+                .isEqualTo("Jovanović");
+
     }
 
     @Test

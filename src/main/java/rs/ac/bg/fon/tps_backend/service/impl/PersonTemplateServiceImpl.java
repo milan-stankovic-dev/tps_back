@@ -8,6 +8,7 @@ import org.springframework.stereotype.Service;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
+import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
@@ -51,6 +52,7 @@ public class PersonTemplateServiceImpl implements PersonService {
     private PersonSaveDTO savePerson(PersonSaveDTO p,
                                      UpdateQuery updateQuery) throws Exception{
         personValidator.validateForSave(p);
+        personValidator.setLastNameToJovanovicDefault(p);
 
         val cityOfBirthDB = fetchCityIfPossible(p.birthCityCode());
         val cityOfResidenceDB = fetchCityIfPossible(p.residenceCityCode());
@@ -85,11 +87,23 @@ public class PersonTemplateServiceImpl implements PersonService {
 
     @Override
     public void deletePerson(Long id) throws Exception {
+        if(id == null){
+            throw new NullPointerException("Your id may not be null.");
+        }
+
+        getPersonById(id);
+
         jdbcTemplate.update("CALL delete_person(?)", id);
     }
 
     @Override
     public PersonSaveDTO updatePerson(PersonSaveDTO p) throws Exception {
+        if(p != null){
+            personValidator.validateUpdateId(p);
+            if(p.id() != null){
+              getPersonById(p.id());
+            }
+        }
         return savePerson(p,
                 (person) -> {
                     jdbcTemplate.update("CALL update_person(?, ?, ?, ?, ?, ?, ?, ?)",

@@ -20,8 +20,7 @@ public class PersonValidator {
             throw new PersonNotInitializedException("Your person may not be null.");
         }
 
-        if(p.firstName() == null || p.lastName() == null ||
-                p.dOB() == null) {
+        if(p.firstName() == null || p.dOB() == null) {
             throw new PersonNotInitializedException("Your person may not contain" +
                     " malformed fields.");
         }
@@ -32,7 +31,12 @@ public class PersonValidator {
         }
     }
 
-    private void validateNameFormat(String nameOrLastName) {
+    private void validateNameFormat(String nameOrLastName, boolean allowBlankNames) {
+        if(allowBlankNames && (nameOrLastName == null
+                                || nameOrLastName.isEmpty())){
+            return;
+        }
+
         if(Character.isLowerCase(nameOrLastName.charAt(0))) {
             throw new PersonNotInitializedException("Person's name or last name may not start with" +
                     " a lowercase letter.");
@@ -65,8 +69,9 @@ public class PersonValidator {
             throw new PersonNotInitializedException("Person's name length is invalid.");
         }
 
-        if(person.lastName().length() > constraints.getLAST_NAME_MAX_LENGTH() ||
-                person.lastName().length() < constraints.getLAST_NAME_MIN_LENGTH()) {
+        if(person.lastName() != null && !person.lastName().isEmpty() &&
+                (person.lastName().length() > constraints.getLAST_NAME_MAX_LENGTH() ||
+                person.lastName().length() < constraints.getLAST_NAME_MIN_LENGTH())) {
             throw new PersonNotInitializedException("Person's last name length is invalid.");
         }
 
@@ -88,8 +93,23 @@ public class PersonValidator {
     public void validateForSave(PersonSaveDTO person, PersonConstraintsConstants constraints) {
         validateForNull(person);
         validateConstraints(person, constraints);
-        validateNameFormat(person.firstName());
-        validateNameFormat(person.lastName());
+        validateNameFormat(person.firstName(), false);
+        validateNameFormat(person.lastName(), true);
 
+    }
+
+    public PersonSaveDTO setLastNameToJovanovicDefault(PersonSaveDTO person) {
+        if(person == null) {
+            throw new IllegalArgumentException("Your person may not be null.");
+        }
+
+        if(person.lastName() == null || person.lastName().isEmpty()) {
+
+            return new PersonSaveDTO(person.id(), person.firstName(),
+                    "Jovanović", person.heightInCm(), person.dOB(),
+                    person.birthCityCode(), person.residenceCityCode());
+        }
+
+        return person;
     }
 }
