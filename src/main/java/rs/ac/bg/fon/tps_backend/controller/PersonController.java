@@ -14,8 +14,8 @@ import rs.ac.bg.fon.tps_backend.service.PersonService;
 import java.util.List;
 
 @RestController
-//@RequiredArgsConstructor
 @RequestMapping("/person")
+@CrossOrigin(origins = "http://localhost:4200")
 public class PersonController {
 
     private final PersonService personService;
