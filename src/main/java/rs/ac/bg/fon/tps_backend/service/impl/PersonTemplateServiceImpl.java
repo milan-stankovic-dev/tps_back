@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
-import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
@@ -52,11 +51,12 @@ public class PersonTemplateServiceImpl implements PersonService {
     private PersonSaveDTO savePerson(PersonSaveDTO p,
                                      UpdateQuery updateQuery) throws Exception{
         personValidator.validateForSave(p);
-        personValidator.setLastNameToJovanovicDefault(p);
+        val pFixed = personValidator.setLastNameToJovanovicDefault(p);
 
-        val cityOfBirthDB = fetchCityIfPossible(p.birthCityCode());
-        val cityOfResidenceDB = fetchCityIfPossible(p.residenceCityCode());
-        val personToSave = personSaveConverter.toEntity(p);
+
+        val cityOfBirthDB = fetchCityIfPossible(pFixed.birthCityCode());
+        val cityOfResidenceDB = fetchCityIfPossible(pFixed.residenceCityCode());
+        val personToSave = personSaveConverter.toEntity(pFixed);
 
         personToSave.setCityOfBirth(cityOfBirthDB);
         personToSave.setCityOfResidence(cityOfResidenceDB);
@@ -131,5 +131,32 @@ public class PersonTemplateServiceImpl implements PersonService {
         return personDisplayConverter.toDto(
                 personDB
         );
+    }
+
+    public List<PersonDisplayDTO> getAllSmederevci() {
+        return personDisplayConverter.listToDTO(
+                jdbcTemplate.query("SELECT * FROM select_smederevci()",
+                        personRowMapper)
+        );
+    }
+
+    @Override
+    public List<PersonDisplayDTO> getAllAdults() {
+        return personDisplayConverter.listToDTO(
+                jdbcTemplate.query("SELECT * FROM select_adults()",
+                        personRowMapper)
+        );
+    }
+
+    @Override
+    public Integer getMaxHeight() {
+        return jdbcTemplate.queryForObject(
+                "SELECT * FROM max_height()", Integer.class);
+    }
+
+    @Override
+    public Double getAverageAgeYears() {
+        return jdbcTemplate.queryForObject(
+                "SELECT * FROM average_age_years()", Double.class);
     }
 }

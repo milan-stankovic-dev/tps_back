@@ -135,7 +135,7 @@ public class PersonRowMappingTest {
                         new SimpleDateFormat(dateConstant.getDATE_FORMAT())
                                 .parse("2000-01-01").getTime()));
 
-        when(dateUtil.dateToLocalDate(any(Date.class)))
+        when(dateUtil.sqlDateToLocalDate(any(Date.class)))
                 .thenReturn(LocalDate.of(2000,1,1));
 
         assertThat(mapper.mapRow(rs, 0))

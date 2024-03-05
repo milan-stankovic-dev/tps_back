@@ -2,6 +2,7 @@ package rs.ac.bg.fon.tps_backend.service.impl;
 
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import lombok.val;
 import org.springframework.stereotype.Service;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
@@ -10,11 +11,16 @@ import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
+import rs.ac.bg.fon.tps_backend.mapper.CityRowMapper;
+import rs.ac.bg.fon.tps_backend.mapper.PersonRowMapper;
 import rs.ac.bg.fon.tps_backend.repository.CityRepository;
 import rs.ac.bg.fon.tps_backend.repository.PersonRepository;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
+import java.sql.ResultSet;
+import java.sql.SQLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -26,6 +32,7 @@ public class PersonServiceImpl implements PersonService {
     private final PersonSaveConverter personSaveConverter;
     private final PersonDisplayConverter personDisplayConverter;
     private final PersonValidator personValidator;
+    private final PersonTemplateServiceImpl personTemplateService;
     @Override
     public List<PersonDisplayDTO> getAll() {
         return personDisplayConverter.listToDTO(
@@ -36,11 +43,12 @@ public class PersonServiceImpl implements PersonService {
     @Override
     public PersonSaveDTO savePerson(PersonSaveDTO p) throws Exception {
         personValidator.validateForSave(p);
-        personValidator.setLastNameToJovanovicDefault(p);
+        val pFixed = personValidator.setLastNameToJovanovicDefault(p);
 
-        final City cityOfBirth = fetchCityIfPossible(p.birthCityCode());
-        final City cityOfResidence = fetchCityIfPossible(p.residenceCityCode());
-        final Person personToSave = personSaveConverter.toEntity(p);
+
+        final City cityOfBirth = fetchCityIfPossible(pFixed.birthCityCode());
+        final City cityOfResidence = fetchCityIfPossible(pFixed.residenceCityCode());
+        final Person personToSave = personSaveConverter.toEntity(pFixed);
 
         personToSave.setCityOfBirth(cityOfBirth);
         personToSave.setCityOfResidence(cityOfResidence);
@@ -86,19 +94,39 @@ public class PersonServiceImpl implements PersonService {
     public PersonSaveDTO updatePerson(PersonSaveDTO p) throws Exception {
         personValidator.validateForSave(p);
         personValidator.validateUpdateId(p);
-        personValidator.setLastNameToJovanovicDefault(p);
+        val pFixed = personValidator.setLastNameToJovanovicDefault(p);
 
-        final Person personFromDb = fetchPersonIfPossible(p.id());
+        final Person personFromDb = fetchPersonIfPossible(pFixed.id());
         final City cityOfBirth = fetchCityIfPossible(p.birthCityCode());
         final City cityOfResidence = fetchCityIfPossible(p.residenceCityCode());
 
         final Person personToSave =
-                personSaveConverter.toEntity(p);
+                personSaveConverter.toEntity(pFixed);
 
         personToSave.setCityOfBirth(cityOfBirth);
         personToSave.setCityOfResidence(cityOfResidence);
 
         return personSaveConverter
                 .toDto(personRepository.save(personToSave));
+    }
+
+    @Override
+    public List<PersonDisplayDTO> getAllSmederevci() throws SQLException {
+        return personTemplateService.getAllSmederevci();
+    }
+
+    @Override
+    public List<PersonDisplayDTO> getAllAdults() throws SQLException {
+        return personTemplateService.getAllAdults();
+    }
+
+    @Override
+    public Integer getMaxHeight() {
+        return personRepository.getMaxHeight();
+    }
+
+    @Override
+    public Double getAverageAgeYears() {
+        return personRepository.getAverageAgeYears();
     }
 }

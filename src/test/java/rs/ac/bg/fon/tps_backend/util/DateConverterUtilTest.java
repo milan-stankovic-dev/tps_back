@@ -53,22 +53,20 @@ public class DateConverterUtilTest {
     }
 
     @Test
-    @DisplayName("Null date to localDate")
-    public void nullDateToLocalDateTest() {
-        assertThatThrownBy(() -> converter.dateToLocalDate(null))
+    @DisplayName("Null sql date to localDate")
+    public void nullSQLDateToLocalDateTest() {
+        assertThatThrownBy(() -> converter.sqlDateToLocalDate(null))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Date may not be null.");
     }
 
     @ParameterizedTest
     @CsvFileSource(resources = "/date_mock.csv")
-    @DisplayName("Normal date to localDate")
-    @SneakyThrows(ParseException.class)
-    public void normalDateToLocalDateTest(String dateString) {
-        val dateInput = formatterForDate.parse(dateString);
+    @DisplayName("Normal sql date to localDate")
+    public void normalSQLDateToLocalDateTest(String dateString) {
         val localDateInput = formatterForLocalDate.parse(dateString, LocalDate::from);
 
-        val localDateConverted = converter.dateToLocalDate(dateInput);
+        val localDateConverted = converter.sqlDateToLocalDate(java.sql.Date.valueOf(dateString));
         val localDateExpected = localDateInput;
 
         assertThat(localDateConverted)
@@ -86,16 +84,37 @@ public class DateConverterUtilTest {
     @ParameterizedTest
     @CsvFileSource(resources = "/date_mock.csv")
     @DisplayName("Normal localDate to date")
-    @SneakyThrows(ParseException.class)
     public void normalToLocalDateToDateTest(String dateString) {
-        val dateInput = formatterForDate.parse(dateString);
         val localDateInput = formatterForLocalDate.parse(dateString, LocalDate::from);
 
-        val dateConverted = converter.dateToLocalDate(dateInput);
+        val dateConverted = converter.sqlDateToLocalDate(java.sql.Date.valueOf(dateString));
         val dateExpected = localDateInput;
 
         assertThat(dateConverted)
                 .isEqualTo(dateExpected);
+    }
+
+    @Test
+    @DisplayName("Null util date to localDate")
+    public void nullUtilDateToLocalDateTest() {
+        assertThatThrownBy(() -> converter.utilDateToLocalDate(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Date may not be null.");
+    }
+
+    @ParameterizedTest
+    @CsvFileSource(resources = "/date_mock.csv")
+    @DisplayName("Normal sql date to localDate")
+    @SneakyThrows(ParseException.class)
+    public void normalUtilDateToLocalDateTest(String dateString)  {
+        val dateInput = formatterForDate.parse(dateString);
+        val localDateInput = formatterForLocalDate.parse(dateString, LocalDate::from);
+
+        val localDateConverted = converter.utilDateToLocalDate(dateInput);
+        val localDateExpected = localDateInput;
+
+        assertThat(localDateConverted)
+                .isEqualTo(localDateExpected);
     }
 
 }

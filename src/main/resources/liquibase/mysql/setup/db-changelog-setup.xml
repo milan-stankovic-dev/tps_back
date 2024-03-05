@@ -42,11 +42,13 @@
     </changeSet>
     <changeSet id="create_func_average_age_years" author="milan s.">
         <sqlFile path="ddl/create_func_average_age_years.sql"
-                 relativeToChangelogFile="true"/>
+                 relativeToChangelogFile="true"
+                splitStatements="false"/>
     </changeSet>
     <changeSet id="create_func_average_age" author="milan s.">
         <sqlFile path="ddl/create_func_max_height.sql"
-                 relativeToChangelogFile="true"/>
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
     </changeSet>
     <changeSet id="create_func_select_person" author="milan s.">
         <sqlFile path="ddl/create_func_select_person.sql"
@@ -83,5 +85,16 @@
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+    <changeSet id="create_func_select_adults" author="milan s.">
+        <sqlFile path="ddl/create_func_select_adults.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="create_func_select_smederevci" author="milan s.">
+        <sqlFile path="ddl/create_func_select_smederevci.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+
 
 </databaseChangeLog>

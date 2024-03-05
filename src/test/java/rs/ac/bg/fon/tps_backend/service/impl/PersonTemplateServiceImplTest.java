@@ -1,12 +1,10 @@
 package rs.ac.bg.fon.tps_backend.service.impl;
 
-import jakarta.persistence.EntityNotFoundException;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -15,6 +13,8 @@ import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
 import rs.ac.bg.fon.tps_backend.domain.Person;
+import rs.ac.bg.fon.tps_backend.dto.CityDTO;
+import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.PersonNotInitializedException;
 import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
@@ -24,8 +24,11 @@ import rs.ac.bg.fon.tps_backend.mapper.PersonRowMapper;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
+import java.sql.Array;
+import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.Optional;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -126,6 +129,9 @@ public class PersonTemplateServiceImplTest {
                 .thenReturn(person);
         when(personSaveConverter.toDto(person))
                 .thenReturn(personSaveDTO);
+        when(personValidator.setLastNameToJovanovicDefault(personSaveDTO))
+                .thenReturn(personSaveDTO);
+
         final PersonSaveDTO personSaved = personService.savePerson(personSaveDTO);
         assertThat(personSaved).isEqualTo(personSaveDTO);
 
@@ -165,6 +171,9 @@ public class PersonTemplateServiceImplTest {
                 -1, 11_000
         );
 
+        when(personValidator.setLastNameToJovanovicDefault(person))
+                .thenReturn(person);
+
         when(jdbcTemplate.queryForObject(
                 eq("SELECT * FROM select_city_by_pptbr(?)"),
                 eq(cityMapper),
@@ -185,6 +194,9 @@ public class PersonTemplateServiceImplTest {
                 LocalDate.of(2000,1,1),
                 19_000, -1
         );
+
+        when(personValidator.setLastNameToJovanovicDefault(person))
+                .thenReturn(person);
 
         when(jdbcTemplate.queryForObject(
                 eq("SELECT * FROM select_city_by_pptbr(?)"),
@@ -350,6 +362,9 @@ public class PersonTemplateServiceImplTest {
                 eq(cityMapper),
                 eq(personSaveDTO.birthCityCode()))).thenReturn(null);
 
+        when(personValidator.setLastNameToJovanovicDefault(personSaveDTO))
+                .thenReturn(personSaveDTO);
+
         assertThatThrownBy(()->personService.updatePerson(personSaveDTO))
                 .isInstanceOf(UnknownCityException.class)
                 .hasMessage("Person contains reference to unknown city.");
@@ -387,6 +402,8 @@ public class PersonTemplateServiceImplTest {
                 .validateUpdateId(personSaveDTO);
         doNothing().when(personValidator)
                 .validateForSave(personSaveDTO);
+        when(personValidator.setLastNameToJovanovicDefault(personSaveDTO))
+                .thenReturn(personSaveDTO);
 
         when(jdbcTemplate.queryForObject(
                 eq("SELECT * FROM select_person_by_id(?)"),
@@ -495,6 +512,8 @@ public class PersonTemplateServiceImplTest {
                 .validateUpdateId(personSaveDTO);
         doNothing().when(personValidator)
                 .validateForSave(personSaveDTO);
+        when(personValidator.setLastNameToJovanovicDefault(personSaveDTO))
+                .thenReturn(personSaveDTO);
 
         when(jdbcTemplate.queryForObject(
                 eq("SELECT * FROM select_person_by_id(?)"),
@@ -552,5 +571,123 @@ public class PersonTemplateServiceImplTest {
                 .toEntity(personSaveDTO);
         verify(personSaveConverter, times(1))
                 .toDto(any(Person.class));
+    }
+
+    @Test
+    @DisplayName("Get all Smederevo test")
+    public void getAllSmederevoTest() throws SQLException {
+        val city1 = City.builder().id(1L)
+                .pptbr(11_300).name("Smederevo").build();
+        val city2 = City.builder().id(2L)
+                .pptbr(19_000).name("Zajecar").build();
+        val person1 = new Person(
+                1L, "Pera", "Peric", 189,
+                LocalDate.of(2000,1,1), 0,
+                city1,city2
+        );
+        val person2 = new Person(
+                1L, "Sima", "Simic", 177,
+                LocalDate.of(1999,2,2), 0,
+                city1,city2
+        );
+        val personList = List.of(person1, person2);
+
+        val cityDTO1 = new CityDTO(
+                1L, "Smederevo"
+        );
+        val cityDto2 = new CityDTO(
+                2L, "Zajecar"
+        );
+        val personDto1 = new PersonDisplayDTO(
+                1L, "Pera", "Peric", 189,
+                LocalDate.of(2000,1,1), 0,
+                "Smederevo", 11_300,
+                "Zajecar", 19_000
+        );
+        val personDto2 = new PersonDisplayDTO(
+                2L, "Sima", "Simic", 177,
+                LocalDate.of(1999,2,2), 0,
+                "Smederevo", 11_300,
+                "Zajecar", 19_000
+        );
+        final List<PersonDisplayDTO> personDtoList
+                = List.of(personDto1, personDto2);
+
+        when(personDisplayConverter.listToDTO(personList))
+                .thenReturn(personDtoList);
+        when(jdbcTemplate.query(
+                eq("SELECT * FROM select_smederevci()"),
+                any(PersonRowMapper.class)
+        )).thenReturn(personList);
+
+        final List<PersonDisplayDTO> smederevci =
+                personService.getAllSmederevci();
+
+        assertThat(smederevci)
+                .isEqualTo(personDtoList);
+        verify(personDisplayConverter,times(1))
+                .listToDTO(personList);
+        verify(jdbcTemplate, times(1))
+                .query(eq("SELECT * FROM select_smederevci()"),
+                        eq(personMapper));
+    }
+
+    @Test
+    @DisplayName("Get all adults test")
+    public void getAllAdultsTest() throws SQLException {
+        val city1 = City.builder().id(1L)
+                .pptbr(11_300).name("Smederevo").build();
+        val city2 = City.builder().id(2L)
+                .pptbr(19_000).name("Zajecar").build();
+        val person1 = new Person(
+                1L, "Pera", "Peric", 189,
+                LocalDate.of(2000,1,1), 300,
+                city1,city2
+        );
+        val person2 = new Person(
+                1L, "Sima", "Simic", 177,
+                LocalDate.of(1999,2,2), 300,
+                city1,city2
+        );
+        val personList = List.of(person1, person2);
+
+        val cityDTO1 = new CityDTO(
+                1L, "Smederevo"
+        );
+        val cityDto2 = new CityDTO(
+                2L, "Zajecar"
+        );
+        val personDto1 = new PersonDisplayDTO(
+                1L, "Pera", "Peric", 189,
+                LocalDate.of(2000,1,1), 300,
+                "Smederevo", 11_300,
+                "Zajecar", 19_000
+        );
+        val personDto2 = new PersonDisplayDTO(
+                2L, "Sima", "Simic", 177,
+                LocalDate.of(1999,2,2), 300,
+                "Smederevo", 11_300,
+                "Zajecar", 19_000
+        );
+        final List<PersonDisplayDTO> personDtoList
+                = List.of(personDto1, personDto2);
+
+        when(personDisplayConverter.listToDTO(personList))
+                .thenReturn(personDtoList);
+        when(jdbcTemplate.query(
+                eq("SELECT * FROM select_adults()"),
+                any(PersonRowMapper.class)
+        )).thenReturn(personList);
+
+        final List<PersonDisplayDTO> adults =
+                personService.getAllAdults();
+
+        assertThat(adults)
+                .isEqualTo(personDtoList);
+        verify(personDisplayConverter,times(1))
+                .listToDTO(personList);
+        verify(jdbcTemplate, times(1))
+                .query(eq("SELECT * FROM select_adults()"),
+                        eq(personMapper));
     }
 }

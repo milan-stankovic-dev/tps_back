@@ -8,7 +8,7 @@ import java.util.Date;
 
 @Component
 public class DateConverterUtil {
-    public LocalDate dateToLocalDate(Date date) {
+    public LocalDate utilDateToLocalDate(java.util.Date date) {
         if(date == null){
             throw new IllegalArgumentException("Date may not be null.");
         }
@@ -16,6 +16,14 @@ public class DateConverterUtil {
         return date.toInstant()
                 .atZone(ZoneId.systemDefault())
                 .toLocalDate();
+    }
+
+    public LocalDate sqlDateToLocalDate(java.sql.Date date){
+        if(date == null) {
+            throw new IllegalArgumentException("Date may not be null.");
+        }
+
+        return date.toLocalDate();
     }
 
     public Date localDateToDate(LocalDate localDate) {

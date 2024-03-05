@@ -40,7 +40,7 @@ private final DateConverterUtil dateConverter;
                 .firstName(rs.getString("first_name"))
                 .lastName(rs.getString("last_name"))
                 .heightInCm(rs.getInt("height_in_cm"))
-                .dOB(dateConverter.dateToLocalDate(
+                .dOB(dateConverter.sqlDateToLocalDate(
                         rs.getDate("dob")))
                 .ageInMonths(rs.getInt("age_in_months"))
                 .cityOfBirth(cityOfBirth)

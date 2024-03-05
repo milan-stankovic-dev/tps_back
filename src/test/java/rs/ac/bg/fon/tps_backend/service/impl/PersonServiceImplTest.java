@@ -17,7 +17,9 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.powermock.api.mockito.PowerMockito;
 import org.powermock.core.classloader.annotations.PrepareForTest;
 import org.powermock.modules.junit4.PowerMockRunner;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.jdbc.core.JdbcTemplate;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
@@ -25,12 +27,17 @@ import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.PersonNotInitializedException;
 import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
+import rs.ac.bg.fon.tps_backend.mapper.CityRowMapper;
+import rs.ac.bg.fon.tps_backend.mapper.PersonRowMapper;
 import rs.ac.bg.fon.tps_backend.repository.CityRepository;
 import rs.ac.bg.fon.tps_backend.repository.PersonRepository;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
+import rs.ac.bg.fon.tps_backend.util.DateConverterUtil;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
+import java.sql.SQLException;
 import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -46,16 +53,15 @@ public class PersonServiceImplTest {
     @Mock
     private CityRepository cityRepository;
     @Mock
-    @Qualifier("personServiceImpl")
-    private PersonService personService;
+    private PersonServiceImpl personService;
     @Mock
     private PersonSaveConverter personSaveConverter;
     @Mock
     private PersonDisplayConverter personDisplayConverter;
     @Mock
     private PersonValidator personValidator;
-
-
+    @Mock
+    private PersonTemplateServiceImpl personTemplateService;
     @BeforeEach
     void setUp() {
         personService = new PersonServiceImpl(
@@ -63,7 +69,8 @@ public class PersonServiceImplTest {
                 cityRepository,
                 personSaveConverter,
                 personDisplayConverter,
-                personValidator);
+                personValidator,
+                personTemplateService);
     }
 
     @Test
@@ -95,6 +102,8 @@ public class PersonServiceImplTest {
         final Person person = new Person(1L, "Pera", "Peric",
                 189, LocalDate.of(2000,1,1),0,
                 cityBirth,cityResidence);
+        when(personValidator.setLastNameToJovanovicDefault(personSaveDTO))
+                .thenReturn(personSaveDTO);
 
         when(cityRepository.findByPptbr(anyInt()))
                 .thenAnswer(invocation -> {
@@ -128,6 +137,10 @@ public class PersonServiceImplTest {
                     LocalDate.of(2000,1,1),
                 -1, 11_000
         );
+
+        when(personValidator.setLastNameToJovanovicDefault(person))
+                .thenReturn(person);
+
         assertThatThrownBy(()-> personService.savePerson(person))
                 .isInstanceOf(UnknownCityException.class)
                 .hasMessage("Person contains reference to unknown city.");
@@ -143,6 +156,9 @@ public class PersonServiceImplTest {
                 LocalDate.of(2000,1,1),
                 19_000, -1
         );
+        when(personValidator.setLastNameToJovanovicDefault(person))
+                .thenReturn(person);
+
         when(cityRepository.findByPptbr(person.birthCityCode()))
                 .thenReturn(Optional.of(new City()));
 
@@ -235,6 +251,9 @@ public class PersonServiceImplTest {
                 LocalDate.of(2000,1,1),0,
                 City.builder().pptbr(11_000).build(), City.builder().pptbr(19_0000).build()
         );
+        when(personValidator.setLastNameToJovanovicDefault(personSaveDTO))
+                .thenReturn(personSaveDTO);
+
         when(personSaveConverter.toEntity(personSaveDTO))
                 .thenReturn(person);
 
@@ -258,6 +277,9 @@ public class PersonServiceImplTest {
                 11_000, 19_000
         );
 
+        when(personValidator.setLastNameToJovanovicDefault(person))
+                .thenReturn(person);
+
         when(personRepository.findById(person.id()))
                 .thenReturn(Optional.of(new Person()));
 
@@ -280,6 +302,8 @@ public class PersonServiceImplTest {
                 11_000, 19_000
         );
 
+        when(personValidator.setLastNameToJovanovicDefault(person))
+                .thenReturn(person);
         when(personRepository.findById(person.id()))
                 .thenReturn(Optional.of(new Person()));
         when(cityRepository.findByPptbr(11_000))
@@ -336,6 +360,9 @@ public class PersonServiceImplTest {
                 189, LocalDate.of(2000,1,1),0,
                 cityBirth,cityResidence);
 
+        when(personValidator.setLastNameToJovanovicDefault(personSaveDTO))
+                .thenReturn(personSaveDTO);
+
         when(cityRepository.findByPptbr(anyInt()))
                 .thenAnswer(invocation -> {
                     if((int) invocation.getArgument(0) == 11_000){
@@ -362,5 +389,65 @@ public class PersonServiceImplTest {
                 .validateForSave(personSaveDTO);
         verify(personValidator, times(1))
                 .validateUpdateId(personSaveDTO);
+    }
+
+    @Test
+    @DisplayName("Get all Smederevo test")
+    public void getAllSmederevo() throws SQLException {
+        when(personTemplateService.getAllSmederevci())
+                .thenReturn(new ArrayList<>());
+
+        val result = personService.getAllSmederevci();
+
+        assertThat(result)
+                .isEqualTo(new ArrayList<>());
+        verify(personTemplateService, times(1))
+                .getAllSmederevci();
+    }
+
+    @Test
+    @DisplayName("Get all adults test")
+    public void getAllAdults() throws SQLException {
+        when(personTemplateService.getAllAdults())
+                .thenReturn(new ArrayList<>());
+
+        val result = personService.getAllAdults();
+
+        assertThat(result)
+                .isEqualTo(new ArrayList<>());
+        verify(personTemplateService, times(1))
+                .getAllAdults();
+    }
+
+    @Test
+    @DisplayName("Get max height test")
+    public void getMaxHeightTest() {
+        final int expectedResult = 190;
+        when(personRepository.getMaxHeight())
+                .thenReturn(expectedResult);
+
+        final int actualResult =
+                personService.getMaxHeight();
+
+        assertThat(actualResult)
+                .isEqualTo(expectedResult);
+        verify(personRepository,times(1))
+                .getMaxHeight();
+    }
+
+    @Test
+    @DisplayName("Get average age years test")
+    public void getAverageAgeYearsTest() {
+        final Double expectedResult = 25.50;
+        when(personRepository.getAverageAgeYears())
+                .thenReturn(expectedResult);
+
+        final Double actualResult =
+                personService.getAverageAgeYears();
+
+        assertThat(actualResult)
+                .isEqualTo(expectedResult);
+        verify(personRepository,times(1))
+                .getAverageAgeYears();
     }
 }
