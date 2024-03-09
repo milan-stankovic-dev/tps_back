@@ -93,6 +93,21 @@
         <sqlFile path="ddl/create_trigger_calculate_age_update.sql" relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
+    <changeSet id="create_func_set_last_name_jovanovic_for_null" author="milan s.">
+        <sqlFile path="ddl/create_func_set_last_name_jovanovic_for_null.sql"
+                relativeToChangelogFile="true"
+                splitStatements="false"/>
+    </changeSet>
+    <changeSet id="create_trigger_set_last_name_jovanovic" author="milan s.">
+        <sqlFile path="ddl/create_trigger_set_last_name_jovanovic.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
+    <changeSet id="create_trigger_set_last_name_jovanovic_update" author="milan s.">
+        <sqlFile path="ddl/create_trigger_set_last_name_jovanovic_update.sql"
+                 relativeToChangelogFile="true"
+                 splitStatements="false"/>
+    </changeSet>
     <changeSet id="populate_person" author="milan s.">
         <sqlFile path="dml/populate_person.sql"
                  relativeToChangelogFile="true"/>
