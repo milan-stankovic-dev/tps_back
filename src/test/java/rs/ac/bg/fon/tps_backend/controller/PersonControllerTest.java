@@ -148,6 +148,8 @@ class PersonControllerTest {
                 .containsEntry("detail", "Failed to read request")
                 .containsEntry("status", "400")
                 .containsEntry("title", "Bad Request");
+        verify(personService, never())
+                .savePerson(any(PersonSaveDTO.class));
     }
 
     @Test

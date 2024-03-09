@@ -3,23 +3,12 @@
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog
                         http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.4.xsd">
     <property name="defaultSchemaName" value="public"/>
-
-    <changeSet id="create_city" author="milan s.">
-        <sqlFile path="ddl/create_city.sql"
-                 relativeToChangelogFile="true"/>
+    <changeSet id="create_trigger_calculate_age" author="milan s.">
+        <sqlFile path="ddl/create_trigger_calculate_age.sql" relativeToChangelogFile="true"
+                 splitStatements="false"/>
     </changeSet>
-    <changeSet id="create_person" author="milan s.">
-        <sqlFile path="ddl/create_person.sql"
-                 relativeToChangelogFile="true"/>
-    </changeSet>
-
-    <changeSet id="populate_city" author="milan s.">
-        <sqlFile path="dml/populate_city.sql"
-                 relativeToChangelogFile="true"/>
-    </changeSet>
-
-    <changeSet id="create_func_calculate_age" author="milan s.">
-        <sqlFile path="ddl/create_func_calculate_age.sql" relativeToChangelogFile="true"
+    <changeSet id="create_trigger_calculate_age_update" author="milan s.">
+        <sqlFile path="ddl/create_trigger_calculate_age_update.sql" relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
     <changeSet id="create_view_adult" author="milan s.">
@@ -33,9 +22,9 @@
     <changeSet id="create_func_average_age_years" author="milan s.">
         <sqlFile path="ddl/create_func_average_age_years.sql"
                  relativeToChangelogFile="true"
-                splitStatements="false"/>
+                 splitStatements="false"/>
     </changeSet>
-    <changeSet id="create_func_average_age" author="milan s.">
+    <changeSet id="create_func_max_height" author="milan s.">
         <sqlFile path="ddl/create_func_max_height.sql"
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
@@ -85,18 +74,4 @@
                  relativeToChangelogFile="true"
                  splitStatements="false"/>
     </changeSet>
-    <changeSet id="create_trigger_calculate_age" author="milan s.">
-        <sqlFile path="ddl/create_trigger_calculate_age.sql" relativeToChangelogFile="true"
-                 splitStatements="false"/>
-    </changeSet>
-    <changeSet id="create_trigger_calculate_age_update" author="milan s.">
-        <sqlFile path="ddl/create_trigger_calculate_age_update.sql" relativeToChangelogFile="true"
-                 splitStatements="false"/>
-    </changeSet>
-    <changeSet id="populate_person" author="milan s.">
-        <sqlFile path="dml/populate_person.sql"
-                 relativeToChangelogFile="true"/>
-    </changeSet>
-
-
 </databaseChangeLog>
