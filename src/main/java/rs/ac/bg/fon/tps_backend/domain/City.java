@@ -19,7 +19,7 @@ import org.hibernate.annotations.NaturalId;
 @Entity
 public class City {
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @NaturalId

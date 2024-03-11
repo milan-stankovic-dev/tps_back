@@ -19,7 +19,7 @@ import java.time.LocalDate;
 public class Person {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     @NotNull
     @Size(max = 30, min = 2, message = "Person's name cannot " +
