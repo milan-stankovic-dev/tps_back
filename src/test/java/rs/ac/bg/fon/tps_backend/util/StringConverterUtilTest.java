@@ -1,61 +1,50 @@
 package rs.ac.bg.fon.tps_backend.util;
 
 import lombok.val;
-import org.junit.AfterClass;
-import org.junit.BeforeClass;
-import org.junit.Test;
+import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.DisplayName;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 
-import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.assertj.core.api.Java6Assertions.assertThatThrownBy;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.junit.jupiter.api.Assertions.*;
 
-public class StringConverterUtilTest {
+@SpringBootTest
+class StringConverterUtilTest {
+    private final StringConverterUtil converter;
 
-    private static StringConverterUtil converter;
-
-    @BeforeClass
-    public static void beforeClass() throws Exception {
-        converter = new StringConverterUtil();
-    }
-
-    @AfterClass
-    public static void afterClass() {
-        converter = null;
+    @Autowired
+    public StringConverterUtilTest(StringConverterUtil converter) {
+        this.converter = converter;
     }
 
     @Test
     @DisplayName("Null string converted to list")
-    public void nullStringConvertToList() {
-        assertThatThrownBy(()-> converter.stringToCharList(null))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Input must not be null.");
+    void nullStringConvertToList() {
+        assertThrows(IllegalArgumentException.class, () -> converter.stringToCharList(null),
+                "Input must not be null.");
     }
 
     @Test
     @DisplayName("Empty string converted to list of chars")
-    public void emptyStringConvertToList() {
+    void emptyStringConvertToList() {
         val resultOfConversion = converter.stringToCharList("");
-        assertThat(resultOfConversion)
-                .isInstanceOf(List.class)
-                .isEmpty();
+        assertTrue(resultOfConversion.isEmpty());
     }
 
     @Test
     @DisplayName("Single blank string converted to list of chars")
-    public void singleBlankStringConvertToList() {
+    void singleBlankStringConvertToList() {
         val resultOfConversion = converter.stringToCharList(" ");
-        assertThat(resultOfConversion)
-                .isInstanceOf(List.class)
-                .contains(' ');
-        assertThat(resultOfConversion.size())
-                .isEqualTo(1);
+        assertEquals(1, resultOfConversion.size());
+        assertTrue(resultOfConversion.contains(' '));
     }
 
     @Test
     @DisplayName("Hello, World! string converted to list")
-    public void helloWorldStringToListOfCharsTest() {
+    void helloWorldStringToListOfCharsTest() {
         val resultOfConversion = converter.stringToCharList("Hello, World!");
         assertThat(resultOfConversion)
                 .isInstanceOf(List.class)
@@ -64,3 +53,4 @@ public class StringConverterUtilTest {
                 .isEqualTo(13);
     }
 }
+
