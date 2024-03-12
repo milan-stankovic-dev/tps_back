@@ -1,13 +1,12 @@
 package rs.ac.bg.fon.tps_backend.service.impl;
 
 import lombok.val;
-import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
@@ -24,10 +23,8 @@ import rs.ac.bg.fon.tps_backend.mapper.PersonRowMapper;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
-import java.sql.Array;
 import java.sql.SQLException;
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -36,39 +33,28 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.*;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-public class PersonTemplateServiceImplTest {
-    @Mock
+@SpringBootTest
+class PersonTemplateServiceImplTest {
+    @MockBean
     private JdbcTemplate jdbcTemplate;
-
-    @Mock
+    @MockBean
     private PersonRowMapper personMapper;
-
-    @Mock
+    @MockBean
     private CityRowMapper cityMapper;
-
-    @Mock
+    @MockBean
     private UpdateQuery updateQuery;
-    @Mock
-    @Qualifier("personTemplateServiceImpl")
-    private PersonService personService;
-    @Mock
+    private final PersonService personService;
+    @MockBean
     private PersonSaveConverter personSaveConverter;
-
-    @Mock
+    @MockBean
     private PersonDisplayConverter personDisplayConverter;
-    @Mock
+    @MockBean
     private PersonValidator personValidator;
 
-    @BeforeEach
-    void setUp() {
-        personService = new PersonTemplateServiceImpl(
-                jdbcTemplate,
-                personSaveConverter,
-                personDisplayConverter,
-                personMapper,
-                cityMapper,
-                personValidator);
+    @Autowired
+    PersonTemplateServiceImplTest(@Qualifier(value = "personTemplateServiceImpl")
+                                  PersonService personService) {
+        this.personService = personService;
     }
 
     @Test

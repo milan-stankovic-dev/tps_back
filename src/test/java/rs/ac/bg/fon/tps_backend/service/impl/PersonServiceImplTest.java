@@ -4,22 +4,16 @@ package rs.ac.bg.fon.tps_backend.service.impl;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.val;
 import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
-import org.mockito.MockedStatic;
-import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import org.powermock.api.mockito.PowerMockito;
-import org.powermock.core.classloader.annotations.PrepareForTest;
-import org.powermock.modules.junit4.PowerMockRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
@@ -27,12 +21,8 @@ import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.PersonNotInitializedException;
 import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
-import rs.ac.bg.fon.tps_backend.mapper.CityRowMapper;
-import rs.ac.bg.fon.tps_backend.mapper.PersonRowMapper;
 import rs.ac.bg.fon.tps_backend.repository.CityRepository;
 import rs.ac.bg.fon.tps_backend.repository.PersonRepository;
-import rs.ac.bg.fon.tps_backend.service.PersonService;
-import rs.ac.bg.fon.tps_backend.util.DateConverterUtil;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
 import java.sql.SQLException;
@@ -42,36 +32,31 @@ import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
-import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.Mockito.*;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 
-@ExtendWith(MockitoExtension.class)
-public class PersonServiceImplTest {
-    @Mock
+@SpringBootTest
+class PersonServiceImplTest {
+    @MockBean
     private PersonRepository personRepository;
-    @Mock
+    @MockBean
     private CityRepository cityRepository;
-    @Mock
-    private PersonServiceImpl personService;
-    @Mock
+
+    private final PersonServiceImpl personService;
+    @MockBean
     private PersonSaveConverter personSaveConverter;
-    @Mock
+    @MockBean
     private PersonDisplayConverter personDisplayConverter;
-    @Mock
+    @MockBean
     private PersonValidator personValidator;
-    @Mock
+    @MockBean
     private PersonTemplateServiceImpl personTemplateService;
-    @BeforeEach
-    void setUp() {
-        personService = new PersonServiceImpl(
-                personRepository,
-                cityRepository,
-                personSaveConverter,
-                personDisplayConverter,
-                personValidator,
-                personTemplateService);
+
+    @Autowired
+    public PersonServiceImplTest(@Qualifier(value = "personServiceImpl")
+                                     PersonServiceImpl personService) {
+        this.personService = personService;
     }
+
 
     @Test
     @DisplayName("Select all persons empty")

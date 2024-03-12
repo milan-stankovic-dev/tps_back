@@ -26,12 +26,10 @@ import java.util.List;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.mockito.Mockito.*;
-import static org.powermock.api.mockito.PowerMockito.verifyStatic;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 @ExtendWith(MockitoExtension.class)
-public class PersonValidatorTest {
-
+class PersonValidatorTest {
     @Spy
     private static PersonValidator personValidator;
 
@@ -55,7 +53,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person null validation test")
-    public void personIsNullTest() {
+    void personIsNullTest() {
         assertThatThrownBy(()-> personValidator.validateForSave(null, constraints))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Your person may not be null.");
@@ -63,7 +61,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person first name null validation test")
-    public void personsNameIsNullTest() {
+    void personsNameIsNullTest() {
         val person = new PersonSaveDTO(1L, null, "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -74,7 +72,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person's name lowercase validation test")
-    public void personsNameLowercaseTest() {
+    void personsNameLowercaseTest() {
         val person = new PersonSaveDTO(1L, "pera", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -85,7 +83,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person's name blank space validation test")
-    public void personsNameBlankSpaceTest() {
+    void personsNameBlankSpaceTest() {
         val person = new PersonSaveDTO(1L, "Pe ra", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -96,7 +94,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person's name number validation test")
-    public void personsNameNumberTest() {
+    void personsNameNumberTest() {
         val person = new PersonSaveDTO(1L, "Pe7ra", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -107,7 +105,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person's name number validation test")
-    public void personsNameUpperCaseTest() {
+    void personsNameUpperCaseTest() {
         val person = new PersonSaveDTO(1L, "PeRa", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -118,7 +116,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person's last name lowercase validation test")
-    public void personsLastNameLowercase() {
+    void personsLastNameLowercase() {
         val person = new PersonSaveDTO(1L, "Pera", "peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -129,7 +127,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person's name blank space validation test")
-    public void personsLastNameBlankSpaceTest() {
+    void personsLastNameBlankSpaceTest() {
         val person = new PersonSaveDTO(1L, "Pera", "P eric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -140,7 +138,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person's name number validation test")
-    public void personsLastNameNumberTest() {
+    void personsLastNameNumberTest() {
         val person = new PersonSaveDTO(1L, "Pera", "Per6ic",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -151,7 +149,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person's name number validation test")
-    public void personsLasNameUppercaseTest() {
+    void personsLasNameUppercaseTest() {
         val person = new PersonSaveDTO(1L, "Pera", "PerIc",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -162,7 +160,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Constraints are null test")
-    public void constraintsNullTest() {
+    void constraintsNullTest() {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -173,7 +171,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Name too short test")
-    public void nameTooShortTest() {
+    void nameTooShortTest() {
         val person = new PersonSaveDTO(1L, "P", "Peric",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -184,7 +182,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Last name too short test")
-    public void lastNameTooShortTest() {
+    void lastNameTooShortTest() {
         val person = new PersonSaveDTO(1L, "Pera", "P",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -195,7 +193,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Name too short test")
-    public void nameTooLongTest() {
+    void nameTooLongTest() {
         val person = new PersonSaveDTO(1L, "Peraaaaaaaaaaaaaaaaaaaaaaaaaaaa", "P",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -206,7 +204,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Last name too long test")
-    public void lastNameTooLongTest() {
+    void lastNameTooLongTest() {
         val person = new PersonSaveDTO(1L, "Pera", "Periccccccccccccccccccccccccccc",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -217,7 +215,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Height too small test")
-    public void heightTooSmallTest() {
+    void heightTooSmallTest() {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 60, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -228,7 +226,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Height too big test")
-    public void heightTooBigTest() {
+    void heightTooBigTest() {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 300, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -239,7 +237,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Dob too early test")
-    public void dobTooEarlyTest() {
+    void dobTooEarlyTest() {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 190, LocalDate.of(1900,1,1),
                 11_000, 11_000);
@@ -250,7 +248,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Dob too late test")
-    public void dobTooLateTest() {
+    void dobTooLateTest() {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 190, LocalDate.of(2100,1,1),
                 11_000, 11_000);
@@ -267,7 +265,7 @@ public class PersonValidatorTest {
             "4,'Marija','Štavljanin',169,'1998-05-10',31000,11000"
     })
     @DisplayName("Normal insert test {index}")
-    public void normalInsertsCSV(@AggregateWith(PersonAggregator.class) PersonSaveDTO person) {
+    void normalInsertsCSV(@AggregateWith(PersonAggregator.class) PersonSaveDTO person) {
         assertDoesNotThrow(()->{
             personValidator.validateForSave(person, constraints);
         });
@@ -275,7 +273,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person last name null validation test")
-    public void personsLastNameIsNullTest() {
+    void personsLastNameIsNullTest() {
         val person = new PersonSaveDTO(1L, "Pera", null,
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -284,7 +282,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Person last name blank validation test")
-    public void personsLastNameIsBlankTest() {
+    void personsLastNameIsBlankTest() {
         val person = new PersonSaveDTO(1L, "Pera", "",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -293,7 +291,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Setting last name to Jovanović test")
-    public void setToJovanovicConditionNotMetTest() {
+    void setToJovanovicConditionNotMetTest() {
         val person = new PersonSaveDTO(1L, "Pera", "Perić",
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -310,7 +308,7 @@ public class PersonValidatorTest {
             "''"
     }, nullValues = "-")
     @DisplayName("Setting last name to Jovanović test")
-    public void setToJovanovicLastName(String lastName) {
+    void setToJovanovicLastName(String lastName) {
         val person = new PersonSaveDTO(1L, "Pera", lastName,
                 190, LocalDate.of(2000,1,1),
                 11_000, 11_000);
@@ -338,7 +336,7 @@ public class PersonValidatorTest {
 
     @Test
     @DisplayName("Testing the validity of the same named method with different signature.")
-    public void fewerArgsMethodTest() {
+    void fewerArgsMethodTest() {
         val person = new PersonSaveDTO(1L, "Pera", "Peric",
                 190, LocalDate.of(1990,1,1),
                 11_000, 11_000);

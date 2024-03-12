@@ -1,13 +1,11 @@
 package rs.ac.bg.fon.tps_backend.mapper;
 
 import lombok.val;
-import org.junit.jupiter.api.AfterAll;
-import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import rs.ac.bg.fon.tps_backend.domain.City;
 
 import java.sql.ResultSet;
@@ -18,25 +16,20 @@ import static org.assertj.core.api.Java6Assertions.assertThatThrownBy;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
-public class CityRowMappingTest {
-
-    private static CityRowMapper mapper;
-    @Mock
+@SpringBootTest
+class CityRowMappingTest {
+    private final CityRowMapper mapper;
+    @MockBean
     private ResultSet rs;
-    @BeforeAll
-    static void beforeAll() {
-        mapper = new CityRowMapper();
-    }
 
-    @AfterAll
-    static void afterAll() {
-        mapper = null;
+    @Autowired
+    public CityRowMappingTest(CityRowMapper mapper) {
+        this.mapper = mapper;
     }
 
     @Test
     @DisplayName("Empty result set mapping")
-    public void emptyResultSetMappingTest() throws SQLException {
+    void emptyResultSetMappingTest() {
         assertThatThrownBy(()->mapper.mapRow(null, 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Result set may not be null.");
@@ -44,7 +37,7 @@ public class CityRowMappingTest {
 
     @Test
     @DisplayName("Regular mapping of result set")
-    public void normalResultSetMappingTest() throws SQLException {
+    void normalResultSetMappingTest() throws SQLException {
         when(rs.getLong("id")).thenReturn(1L);
         when(rs.getString("name")).thenReturn("Beograd");
         when(rs.getInt(any(String.class))).thenAnswer(invocation -> {

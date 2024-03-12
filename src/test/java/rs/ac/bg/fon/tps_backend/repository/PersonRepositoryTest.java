@@ -15,38 +15,22 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class PersonRepositoryTest {
-    private static City city1;
-    private static City city2;
-    private static Person person;
-    @Autowired
-    private PersonRepository personRepository;
-    @Autowired
-    private CityRepository cityRepository;
-
-
-    @BeforeAll
-    static void beforeAll() {
-        city1 = new City(
-          1L, 11_000, "Belgrade", 2_100_000
-        );
-        city2 = new City(
-                2L, 19_000, "Zajecar", 30_000
-        );
-        person = new Person(
+class PersonRepositoryTest {
+    private final City city1 = new City(
+            1L, 11_000, "Belgrade", 2_100_000
+    );
+    private final City city2 = new City(
+            2L, 19_000, "Zajecar", 30_000
+    );
+    private final Person person = new Person(
                 1L, "Pera", "Peric", 189,
                 LocalDate.of(2000,1,1),
                 0, city2, city1
         );
-
-    }
-
-    @AfterAll
-    static void afterAll() {
-        city1 = null;
-        city2 = null;
-        person = null;
-    }
+    @Autowired
+    private PersonRepository personRepository;
+    @Autowired
+    private CityRepository cityRepository;
 
     @BeforeEach
     void setUp() {

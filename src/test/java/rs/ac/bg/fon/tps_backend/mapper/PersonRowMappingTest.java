@@ -7,6 +7,8 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import rs.ac.bg.fon.tps_backend.constants.DateConstant;
 import rs.ac.bg.fon.tps_backend.domain.City;
@@ -28,39 +30,31 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+//@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 public class PersonRowMappingTest {
 
-    private PersonRowMapper mapper;
+    private final PersonRowMapper mapper;
 
-    private DateConstant dateConstant;
-    @Mock
+    private final DateConstant dateConstant;
+    @MockBean
     private JdbcTemplate jdbcTemplate;
 
-    @Mock
+    @MockBean
     private ResultSet rs;
 
-    @Mock
+    @MockBean
     private CityRowMapper cityRowMapper;
 
-    @Mock
+    @MockBean
     private DateConverterUtil dateUtil;
 
-    @BeforeEach
-    void setUp() {
-        mapper = new PersonRowMapper(jdbcTemplate, cityRowMapper,
-                dateUtil);
-        try {
-            dateConstant = new DateConstant(new PropertyUtil());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    @Autowired
+    public PersonRowMappingTest(PersonRowMapper mapper, DateConstant dateConstant) {
+        this.mapper = mapper;
+        this.dateConstant = dateConstant;
     }
 
-    @AfterEach
-    void tearDown() {
-        mapper = null;
-    }
 
     @Test
     @DisplayName("Empty result set mapping")
