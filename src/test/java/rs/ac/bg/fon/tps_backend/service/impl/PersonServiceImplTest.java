@@ -196,6 +196,15 @@ class PersonServiceImplTest {
                 .deleteById(1L);
     }
 
+    @Test
+    @DisplayName("Delete non existing person fail")
+    void deleteNonExistingPersonFailTest() {
+        when(personRepository.existsById(1L))
+                .thenReturn(false);
+        assertThatThrownBy(() -> personService.deletePerson(1L))
+                .isInstanceOf(EntityNotFoundException.class)
+                .hasMessage("Person with said id does not exist.");
+    }
 
     @Test
     @DisplayName("Throws exception due to null id for person to update")

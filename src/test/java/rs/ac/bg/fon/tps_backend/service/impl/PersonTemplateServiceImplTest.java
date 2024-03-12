@@ -1,5 +1,6 @@
 package rs.ac.bg.fon.tps_backend.service.impl;
 
+import jakarta.persistence.EntityNotFoundException;
 import lombok.val;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -557,6 +558,54 @@ class PersonTemplateServiceImplTest {
                 .toEntity(personSaveDTO);
         verify(personSaveConverter, times(1))
                 .toDto(any(Person.class));
+    }
+
+    @Test
+    @DisplayName("Get person by id not found")
+    void getPersonByIdNotFound() {
+        when(jdbcTemplate.queryForObject(
+                eq("SELECT * FROM select_person_by_id(?)"),
+                eq(personMapper),
+                eq(1)))
+                .thenThrow(new EntityNotFoundException("Person with given id does not exist"));
+
+        if(personService instanceof PersonTemplateServiceImpl service) {
+            assertThatThrownBy(()-> service.getPersonById(1L))
+                    .isInstanceOf(EntityNotFoundException.class)
+                    .hasMessage("Person with given id does not exist");
+        }
+    }
+
+    @Test
+    @DisplayName("get max height test")
+    void getMaxHeightTest() {
+        when(jdbcTemplate.queryForObject(
+                eq("SELECT * FROM max_height()"),
+                eq(Integer.class)
+        )).thenReturn(190);
+        val actualResult = personService.getMaxHeight();
+
+        assertThat(actualResult).isEqualTo(190);
+        verify(jdbcTemplate, times(1))
+                .queryForObject(
+                        eq("SELECT * FROM max_height()"),
+                        eq(Integer.class));
+    }
+
+    @Test
+    @DisplayName("get average age years test")
+    void getAverageAgeYearsTest() {
+        when(jdbcTemplate.queryForObject(
+                eq("SELECT * FROM average_age_years()"),
+                eq(Double.class)
+        )).thenReturn(27.4);
+        val actualResult = personService.getAverageAgeYears();
+
+        assertThat(actualResult).isEqualTo(27.4);
+        verify(jdbcTemplate, times(1))
+                .queryForObject(
+                        eq("SELECT * FROM average_age_years()"),
+                        eq(Double.class));
     }
 
     @Test
