@@ -16,33 +16,27 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
-import javax.print.attribute.standard.Media;
 import static org.mockito.Mockito.*;
 import static org.assertj.core.api.AssertionsForClassTypes.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 
-import java.sql.SQLException;
 import java.time.LocalDate;
 import java.util.List;
 
 import static org.mockito.Mockito.when;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
-import org.assertj.core.api.AbstractIterableAssert.*;
+
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(controllers = PersonViewsController.class)
-public class PersonViewsControllerTest {
+class PersonViewsControllerTest {
     final String requestUrl = "/person/views";
-
     @Autowired
     private MockMvc mvc;
-
     @MockBean
     @Qualifier("personTemplateServiceImpl")
     private PersonService personService;
-
     @Autowired
     private ObjectMapper objectMapper;
-
     private List<PersonDisplayDTO> personDTOs;
 
     @BeforeEach
@@ -64,11 +58,11 @@ public class PersonViewsControllerTest {
 
     @Test
     @DisplayName("Get all Smederevci test")
-    public void getAllSmederevoTest() throws Exception {
+    void getAllSmederevoTest() throws Exception {
         when(personService.getAllSmederevci())
                 .thenReturn(personDTOs);
 
-        final String JSONResponse = mvc.perform(get(this.requestUrl + "/smederevo")
+        final String JSONResponse = mvc.perform(get(requestUrl + "/smederevo")
                 .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn().getResponse()
                 .getContentAsString();
@@ -86,11 +80,11 @@ public class PersonViewsControllerTest {
 
     @Test
     @DisplayName("Get all adults test")
-    public void getAllAdultsTest() throws Exception {
+    void getAllAdultsTest() throws Exception {
         when(personService.getAllAdults())
                 .thenReturn(personDTOs);
 
-        final String JSONResponse = mvc.perform(get(this.requestUrl + "/adults")
+        final String JSONResponse = mvc.perform(get(requestUrl + "/adults")
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isOk()).andReturn().getResponse()
                 .getContentAsString();
