@@ -10,6 +10,10 @@ import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 public class PersonSaveConverter implements DTOEntityConverter<PersonSaveDTO, Person> {
     @Override
     public Person toEntity(PersonSaveDTO personSaveDTO) {
+        if(personSaveDTO == null){
+            return null;
+        }
+
         final var cityOfBirth = City.builder()
                 .pptbr(personSaveDTO.birthCityCode())
                 .build();
@@ -28,15 +32,15 @@ public class PersonSaveConverter implements DTOEntityConverter<PersonSaveDTO, Pe
 
     @Override
     public PersonSaveDTO toDto(Person person) {
-        return new PersonSaveDTO(
+        return person == null ? null : new PersonSaveDTO(
                 person.getId(),
                 person.getFirstName(),
                 person.getLastName(),
                 person.getHeightInCm(),
                 person.getDOB(),
-                person.getCityOfBirth() == null? null :
+                person.getCityOfBirth() == null? 0 :
                         person.getCityOfBirth().getPptbr(),
-                person.getCityOfResidence() == null? null :
+                person.getCityOfResidence() == null? 0 :
                         person.getCityOfResidence().getPptbr()
         );
     }

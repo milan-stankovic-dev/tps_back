@@ -302,6 +302,28 @@ class PersonValidatorTest {
                 .isEqualTo(personConverted);
     }
 
+    @Test
+    @DisplayName("Setting last name to Jovanović test person is null")
+    void setToJovanovicNullPersonTest() {
+        assertThatThrownBy(()-> personValidator
+                .setLastNameToJovanovicDefault(null))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Your person may not be null.");
+    }
+
+    @Test
+    @DisplayName("Validating update id for null")
+    void validateUpdateIdNullTest() {
+        val personToTest = new PersonSaveDTO(
+                null, "Pera", "Peric", 190,
+                LocalDate.of(2000,1,1),
+                11_000,11_000
+        );
+        assertThatThrownBy(()-> personValidator.validateUpdateId(personToTest))
+                .isInstanceOf(PersonNotInitializedException.class)
+                .hasMessage("Your person's ID may not be null.");
+    }
+
     @ParameterizedTest
     @CsvSource(value = {
             "-",

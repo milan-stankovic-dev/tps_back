@@ -17,6 +17,8 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Arrays;
+import java.util.List;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -71,10 +73,16 @@ class DateConverterUtilTest {
     @ParameterizedTest
     @CsvFileSource(resources = "/date_mock.csv")
     @DisplayName("Normal localDate to date")
+    @SneakyThrows(ParseException.class)
     void normalToLocalDateToDateTest(String dateString) {
-        val localDateInput = formatterForLocalDate.parse(dateString, LocalDate::from);
+        val localDateInput = formatterForDate.parse(dateString);
 
-        val dateConverted = converter.sqlDateToLocalDate(java.sql.Date.valueOf(dateString));
+        final List<Integer> dateNumbers = Arrays.stream(dateString.split("-")).map(
+                Integer::parseInt).toList();
+
+        val dateConverted = converter.localDateToDate(LocalDate.of(
+                dateNumbers.get(0), dateNumbers.get(1), dateNumbers.get(2)
+        ));
         val dateExpected = localDateInput;
 
         assertThat(dateConverted)

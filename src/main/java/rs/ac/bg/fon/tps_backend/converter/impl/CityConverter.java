@@ -9,7 +9,7 @@ import rs.ac.bg.fon.tps_backend.dto.CityDTO;
 public class CityConverter implements DTOEntityConverter<CityDTO, City> {
     @Override
     public City toEntity(CityDTO cityDTO) {
-        return City.builder()
+        return cityDTO == null ? null : City.builder()
                 .id(cityDTO.id())
                 .name(cityDTO.name())
                 .build();
@@ -17,7 +17,7 @@ public class CityConverter implements DTOEntityConverter<CityDTO, City> {
 
     @Override
     public CityDTO toDto(City city) {
-        return new CityDTO(
+        return city == null ? null : new CityDTO(
                 city.getId(),
                 city.getName()
         );
