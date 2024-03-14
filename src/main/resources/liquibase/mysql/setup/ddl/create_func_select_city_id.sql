@@ -1,13 +1,13 @@
-create or replace function select_city_by_id(id_param BIGINT)
-returns city as $$
-declare
+CREATE OR REPLACE FUNCTION select_city_by_id(id_param BIGINT)
+RETURNS city AS $$
+DECLARE
     result_city city;
-begin
-    select *
-    into result_city
-    from city
-    where id = id_param;
+BEGIN
+    SELECT *
+    INTO result_city
+    FROM city
+    WHERE id = id_param;
 
-    return result_city;
-end;
+    RETURN result_city;
+END;
 $$ language plpgsql;

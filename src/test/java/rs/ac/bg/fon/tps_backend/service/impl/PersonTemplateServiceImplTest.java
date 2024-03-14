@@ -21,12 +21,16 @@ import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
 import rs.ac.bg.fon.tps_backend.lambda.UpdateQuery;
 import rs.ac.bg.fon.tps_backend.mapper.CityRowMapper;
 import rs.ac.bg.fon.tps_backend.mapper.PersonRowMapper;
+import rs.ac.bg.fon.tps_backend.repository.custom.PersonTemplateRepository;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
+import java.io.IOException;
 import java.sql.SQLException;
+import java.text.ParseException;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatThrownBy;
@@ -51,6 +55,9 @@ class PersonTemplateServiceImplTest {
     private PersonDisplayConverter personDisplayConverter;
     @MockBean
     private PersonValidator personValidator;
+
+    @MockBean
+    private PersonTemplateRepository personTemplateRepository;
 
     @Autowired
     PersonTemplateServiceImplTest(@Qualifier(value = "personTemplateServiceImpl")
@@ -243,10 +250,10 @@ class PersonTemplateServiceImplTest {
                 LocalDate.of(2000,1,1),
                 0, new City(), new City());
 
-        when(jdbcTemplate.queryForObject(
-                eq("SELECT * FROM select_person_by_id(?)"),
-                eq(personMapper), eq(1L)
-        )).thenReturn(person);
+        when(personTemplateRepository.getPersonById(
+                eq(1L),
+                eq("CALL select_person_by_id(?,?)")
+        )).thenReturn(Optional.of(person));
 
         personService.deletePerson(1L);
 
@@ -338,11 +345,11 @@ class PersonTemplateServiceImplTest {
         doNothing().when(personValidator)
                 .validateForSave(personSaveDTO);
 
-        when(jdbcTemplate.queryForObject(
-                eq("SELECT * FROM select_person_by_id(?)"),
-                eq(personMapper),
-                eq(personSaveDTO.id())
-        )).thenReturn(person);
+        when(personTemplateRepository.getPersonById(
+                eq(1L),
+                eq("CALL select_person_by_id(?,?)")
+        )).thenReturn(Optional.of(person));
+
 
         when(jdbcTemplate.queryForObject(
                 eq("SELECT * FROM select_city_by_pptbr(?)"),
@@ -392,11 +399,10 @@ class PersonTemplateServiceImplTest {
         when(personValidator.setLastNameToJovanovicDefault(personSaveDTO))
                 .thenReturn(personSaveDTO);
 
-        when(jdbcTemplate.queryForObject(
-                eq("SELECT * FROM select_person_by_id(?)"),
-                eq(personMapper),
-                eq(personSaveDTO.id())
-        )).thenReturn(person);
+        when(personTemplateRepository.getPersonById(
+                eq(1L),
+                eq("CALL select_person_by_id(?,?)")
+        )).thenReturn(Optional.of(person));
 
         when(jdbcTemplate.queryForObject(
                 eq("SELECT * FROM select_city_by_pptbr(?)"),
@@ -442,11 +448,11 @@ class PersonTemplateServiceImplTest {
 
         doThrow(new PersonNotInitializedException("Person's name length is invalid."))
                 .when(personValidator).validateForSave(personSaveDTO);
-        when(jdbcTemplate.queryForObject(
-                eq("SELECT * FROM select_person_by_id(?)"),
-                eq(personMapper),
-                eq(personSaveDTO.id())
-        )).thenReturn(new Person());
+        when(personTemplateRepository.getPersonById(
+                eq(1L),
+                eq("CALL select_person_by_id(?,?)")
+        )).thenReturn(Optional.of(new Person()));
+
 
         assertThatThrownBy(()-> personService.updatePerson(personSaveDTO))
                 .isInstanceOf(PersonNotInitializedException.class)
@@ -502,11 +508,11 @@ class PersonTemplateServiceImplTest {
         when(personValidator.setLastNameToJovanovicDefault(personSaveDTO))
                 .thenReturn(personSaveDTO);
 
-        when(jdbcTemplate.queryForObject(
-                eq("SELECT * FROM select_person_by_id(?)"),
-                eq(personMapper),
-                eq(personSaveDTO.id())
-        )).thenReturn(person);
+        when(personTemplateRepository.getPersonById(
+                eq(1L),
+                eq("CALL select_person_by_id(?,?)")
+        )).thenReturn(Optional.of(person));
+
 
         when(jdbcTemplate.queryForObject(
                 eq("SELECT * FROM select_city_by_pptbr(?)"),
@@ -545,11 +551,10 @@ class PersonTemplateServiceImplTest {
                         eq("SELECT * FROM select_city_by_pptbr(?)"),
                         eq(cityMapper),
                         any(Integer.class));
-        verify(jdbcTemplate,times(1))
-                .queryForObject(
-                        eq("SELECT * FROM select_person_by_id(?)"),
-                        eq(personMapper),
-                        eq(person.getId()));
+        verify(personTemplateRepository,times(1))
+                .getPersonById(
+                        eq(1L),
+                        eq("CALL select_person_by_id(?,?)"));
         verify(personValidator, times(1))
                 .validateForSave(personSaveDTO);
         verify(personValidator, times(1))
@@ -562,12 +567,11 @@ class PersonTemplateServiceImplTest {
 
     @Test
     @DisplayName("Get person by id not found")
-    void getPersonByIdNotFound() {
-        when(jdbcTemplate.queryForObject(
-                eq("SELECT * FROM select_person_by_id(?)"),
-                eq(personMapper),
-                eq(1)))
-                .thenThrow(new EntityNotFoundException("Person with given id does not exist"));
+    void getPersonByIdNotFound() throws SQLException, IOException, ParseException {
+        when(personTemplateRepository.getPersonById(
+                eq(1L),
+                eq("CALL select_person_by_id(?,?)")
+                )).thenReturn(Optional.empty());
 
         if(personService instanceof PersonTemplateServiceImpl service) {
             assertThatThrownBy(()-> service.getPersonById(1L))

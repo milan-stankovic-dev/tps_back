@@ -35,6 +35,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
         val errorPayload = new ErrorPayload(e.getMessage());
         log.log(Level.WARNING, Arrays.toString(e.getStackTrace()));
+        e.printStackTrace();
         return new ResponseEntity<>(errorPayload, HttpStatus.NOT_FOUND);
     }
 
