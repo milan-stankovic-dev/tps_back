@@ -2,10 +2,6 @@ package rs.ac.bg.fon.tps_backend.mapper;
 
 import lombok.val;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -14,9 +10,7 @@ import rs.ac.bg.fon.tps_backend.constants.DateConstant;
 import rs.ac.bg.fon.tps_backend.domain.City;
 import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.util.DateConverterUtil;
-import rs.ac.bg.fon.tps_backend.util.PropertyUtil;
 
-import java.io.IOException;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -30,7 +24,6 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-//@ExtendWith(MockitoExtension.class)
 @SpringBootTest
 public class PersonRowMappingTest {
 
@@ -57,11 +50,20 @@ public class PersonRowMappingTest {
 
 
     @Test
-    @DisplayName("Empty result set mapping")
-    public void emptyResultSetMappingTest() throws SQLException {
+    @DisplayName("Null result set mapping")
+    public void nullResultSetMappingTest() throws SQLException {
         assertThatThrownBy(()->mapper.mapRow(null, 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Result set may not be null.");
+    }
+
+    @Test
+    @DisplayName("Empty result set mapping")
+    public void emptyResultSetMappingTest() throws SQLException {
+        when(rs.getLong("id")).thenReturn(0L);
+
+        assertThat(mapper.mapRow(rs, 0))
+                .isNull();
     }
 
     @Test

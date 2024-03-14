@@ -28,11 +28,20 @@ class CityRowMappingTest {
     }
 
     @Test
-    @DisplayName("Empty result set mapping")
-    void emptyResultSetMappingTest() {
+    @DisplayName("Null result set mapping")
+    void nullResultSetMappingTest() {
         assertThatThrownBy(()->mapper.mapRow(null, 0))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessage("Result set may not be null.");
+    }
+
+    @Test
+    @DisplayName("Empty result set mapping")
+    void emptyResultSetMappingTest() throws SQLException {
+        when(rs.getLong("id")).thenReturn(0L);
+
+        assertThat(mapper.mapRow(rs, 0))
+                .isNull();
     }
 
     @Test

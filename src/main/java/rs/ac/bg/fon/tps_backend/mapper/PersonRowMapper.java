@@ -22,6 +22,9 @@ private final DateConverterUtil dateConverter;
         if(rs == null) {
             throw new IllegalArgumentException("Result set may not be null.");
         }
+        if(rs.getLong("id") == 0){
+            return null;
+        }
 
         val cityOfBirth = jdbcTemplate.queryForObject(
                 "SELECT * FROM select_city_by_id(?)",

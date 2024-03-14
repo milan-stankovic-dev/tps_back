@@ -71,6 +71,17 @@ class PersonValidatorTest {
     }
 
     @Test
+    @DisplayName("Person dob null validation test")
+    void personsDobIsNullTest() {
+        val person = new PersonSaveDTO(1L, "Pera", "Peric",
+                190, null,
+                11_000, 11_000);
+        assertThatThrownBy(()->personValidator.validateForSave(person, constraints))
+                .isInstanceOf(PersonNotInitializedException.class)
+                .hasMessage("Your person may not contain malformed fields.");
+    }
+
+    @Test
     @DisplayName("Person's name lowercase validation test")
     void personsNameLowercaseTest() {
         val person = new PersonSaveDTO(1L, "pera", "Peric",
@@ -312,8 +323,8 @@ class PersonValidatorTest {
     }
 
     @Test
-    @DisplayName("Validating update id for null")
-    void validateUpdateIdNullTest() {
+    @DisplayName("Validating update id for null is null")
+    void validateUpdateIdNullIsNullTest() {
         val personToTest = new PersonSaveDTO(
                 null, "Pera", "Peric", 190,
                 LocalDate.of(2000,1,1),
@@ -322,6 +333,20 @@ class PersonValidatorTest {
         assertThatThrownBy(()-> personValidator.validateUpdateId(personToTest))
                 .isInstanceOf(PersonNotInitializedException.class)
                 .hasMessage("Your person's ID may not be null.");
+    }
+
+    @Test
+    @DisplayName("Validating update id for null")
+    void validateUpdateIdNullTest() {
+        val personToTest = new PersonSaveDTO(
+                1L, "Pera", "Peric", 190,
+                LocalDate.of(2000,1,1),
+                11_000,11_000
+        );
+        personValidator.validateUpdateId(personToTest);
+
+        verify(personValidator, times(1))
+                .validateUpdateId(personToTest);
     }
 
     @ParameterizedTest

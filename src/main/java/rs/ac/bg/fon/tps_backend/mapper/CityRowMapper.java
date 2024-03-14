@@ -14,6 +14,9 @@ public class CityRowMapper implements RowMapper<City> {
         if(rs == null) {
             throw new IllegalArgumentException("Result set may not be null.");
         }
+        if(rs.getLong("id") == 0){
+            return null;
+        }
         return City.builder()
                 .id(rs.getLong("id"))
                 .pptbr(rs.getInt("pptbr"))
