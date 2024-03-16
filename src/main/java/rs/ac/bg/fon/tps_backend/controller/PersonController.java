@@ -21,7 +21,7 @@ public class PersonController {
     private final PersonService personService;
 
     @Autowired
-    public PersonController(@Qualifier("personServiceImpl") PersonService personService) {
+    public PersonController(@Qualifier("personTemplateServiceImpl") PersonService personService) {
         this.personService = personService;
     }
 

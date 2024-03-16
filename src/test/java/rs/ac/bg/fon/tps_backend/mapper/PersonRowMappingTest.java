@@ -2,19 +2,15 @@ package rs.ac.bg.fon.tps_backend.mapper;
 
 import lombok.val;
 import org.junit.jupiter.api.*;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.Mock;
-import org.mockito.Mockito;
-import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.jdbc.core.JdbcTemplate;
 import rs.ac.bg.fon.tps_backend.constants.DateConstant;
 import rs.ac.bg.fon.tps_backend.domain.City;
 import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.util.DateConverterUtil;
-import rs.ac.bg.fon.tps_backend.util.PropertyUtil;
 
-import java.io.IOException;
 import java.sql.Date;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -28,46 +24,46 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.when;
 
-@ExtendWith(MockitoExtension.class)
+@SpringBootTest
 public class PersonRowMappingTest {
 
-    private PersonRowMapper mapper;
+    private final PersonRowMapper mapper;
 
-    private DateConstant dateConstant;
-    @Mock
+    private final DateConstant dateConstant;
+    @MockBean
     private JdbcTemplate jdbcTemplate;
 
-    @Mock
+    @MockBean
     private ResultSet rs;
 
-    @Mock
+    @MockBean
     private CityRowMapper cityRowMapper;
 
-    @Mock
+    @MockBean
     private DateConverterUtil dateUtil;
 
-    @BeforeEach
-    void setUp() {
-        mapper = new PersonRowMapper(jdbcTemplate, cityRowMapper,
-                dateUtil);
-        try {
-            dateConstant = new DateConstant(new PropertyUtil());
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
+    @Autowired
+    public PersonRowMappingTest(PersonRowMapper mapper, DateConstant dateConstant) {
+        this.mapper = mapper;
+        this.dateConstant = dateConstant;
     }
 
-    @AfterEach
-    void tearDown() {
-        mapper = null;
+
+    @Test
+    @DisplayName("Null result set mapping")
+    public void nullResultSetMappingTest() throws SQLException {
+        assertThatThrownBy(()->mapper.mapRow(null, 0))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessage("Result set may not be null.");
     }
 
     @Test
     @DisplayName("Empty result set mapping")
     public void emptyResultSetMappingTest() throws SQLException {
-        assertThatThrownBy(()->mapper.mapRow(null, 0))
-                .isInstanceOf(IllegalArgumentException.class)
-                .hasMessage("Result set may not be null.");
+        when(rs.getLong("id")).thenReturn(0L);
+
+        assertThat(mapper.mapRow(rs, 0))
+                .isNull();
     }
 
     @Test

@@ -10,18 +10,16 @@ import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import rs.ac.bg.fon.tps_backend.domain.City;
 
-import javax.swing.text.html.Option;
-
 import java.util.Optional;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
 @DataJpaTest
 @Transactional(propagation = Propagation.NOT_SUPPORTED)
-public class CityRepositoryTest {
+class CityRepositoryTest {
     @Autowired
     private CityRepository cityRepository;
-    private static final City exampleCity = new City(
+    private final City exampleCity = new City(
             1L, 15_000, "Bor", 20_000
     );
     @BeforeEach

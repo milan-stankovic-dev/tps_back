@@ -1,11 +1,9 @@
 package rs.ac.bg.fon.tps_backend.controller;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.val;
-import org.checkerframework.checker.units.qual.C;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,38 +11,28 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 
-import org.springframework.cglib.core.Local;
 import org.springframework.http.MediaType;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 
-import rs.ac.bg.fon.tps_backend.domain.City;
-import rs.ac.bg.fon.tps_backend.domain.Person;
-import rs.ac.bg.fon.tps_backend.dto.CityDTO;
 import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.PersonNotInitializedException;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
-import static org.awaitility.Awaitility.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.put;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.delete;
-import static org.hamcrest.Matchers.containsInAnyOrder;
 
 @ExtendWith(MockitoExtension.class)
 @WebMvcTest(controllers = PersonController.class)
@@ -54,7 +42,7 @@ class PersonControllerTest {
     private MockMvc mvc;
 
     @MockBean
-    @Qualifier("personServiceImpl")
+    @Qualifier("personTemplateServiceImpl")
     private PersonService personService;
 
     @Autowired
@@ -117,7 +105,7 @@ class PersonControllerTest {
         when(personService.savePerson(personToSave))
                 .thenReturn(personToSave);
 
-        val JSONResponse = mvc.perform(post("/person")
+        val JSONResponse = mvc.perform(post(requestUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JSONRequest))
                 .andExpect(status().isOk()).andReturn().getResponse()
@@ -135,7 +123,7 @@ class PersonControllerTest {
     void savePersonBadPayloadTest() throws Exception {
         final String badJSONRequest = "This is not real JSON!";
 
-        val JSONResponse = mvc.perform(post("/person")
+        val JSONResponse = mvc.perform(post(requestUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(badJSONRequest))
                 .andExpect(status().isBadRequest()).andReturn().getResponse()
@@ -167,7 +155,7 @@ class PersonControllerTest {
                         "Your person may not contain malformed fields."
                 ));
 
-        val JSONResponse = mvc.perform(post("/person")
+        val JSONResponse = mvc.perform(post(requestUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JSONRequest))
                 .andExpect(status().isNotFound()).andReturn().getResponse()
@@ -188,7 +176,7 @@ class PersonControllerTest {
         doNothing().when(personService)
                 .deletePerson(1L);
 
-        val JSONResponse = mvc.perform(delete("/person/{id}",1L)
+        val JSONResponse = mvc.perform(delete(requestUrl + "/{id}",1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 
@@ -201,7 +189,7 @@ class PersonControllerTest {
         doThrow(new EntityNotFoundException("Person with said id does not exist"))
                 .when(personService).deletePerson(100L);
 
-        val JSONResponse = mvc.perform(delete("/person/{id}",100L)
+        val JSONResponse = mvc.perform(delete(requestUrl + "/{id}",100L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNotFound()).andReturn().getResponse()
                 .getContentAsString();
@@ -228,7 +216,7 @@ class PersonControllerTest {
         when(personService.updatePerson(personToSave))
                 .thenReturn(personToSave);
 
-        val JSONResponse = mvc.perform(put("/person")
+        val JSONResponse = mvc.perform(put(requestUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JSONRequest))
                 .andExpect(status().isOk()).andReturn().getResponse()
@@ -245,7 +233,7 @@ class PersonControllerTest {
     void updatePersonBadPayloadTest() throws Exception {
         final String badJSONRequest = "This is not real JSON!";
 
-        val JSONResponse = mvc.perform(put("/person")
+        val JSONResponse = mvc.perform(put(requestUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(badJSONRequest))
                 .andExpect(status().isBadRequest()).andReturn().getResponse()
@@ -275,7 +263,7 @@ class PersonControllerTest {
                         "Your person may not contain malformed fields."
                 ));
 
-        val JSONResponse = mvc.perform(put("/person")
+        val JSONResponse = mvc.perform(put(requestUrl)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(JSONRequest))
                 .andExpect(status().isNotFound()).andReturn().getResponse()

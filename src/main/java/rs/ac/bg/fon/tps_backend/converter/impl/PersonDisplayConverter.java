@@ -14,7 +14,7 @@ public class PersonDisplayConverter implements DTOEntityConverter<PersonDisplayD
 
     @Override
     public Person toEntity(PersonDisplayDTO personDisplayDTO) {
-        return new Person(personDisplayDTO.id(),
+        return personDisplayDTO == null ? null : new Person(personDisplayDTO.id(),
                 personDisplayDTO.firstName(),
                 personDisplayDTO.lastName(),
                 personDisplayDTO.heightInCm(),
@@ -33,7 +33,7 @@ public class PersonDisplayConverter implements DTOEntityConverter<PersonDisplayD
 
     @Override
     public PersonDisplayDTO toDto(Person person) {
-        return new PersonDisplayDTO(
+        return person == null ? null : new PersonDisplayDTO(
                 person.getId(),
                 person.getFirstName(),
                 person.getLastName(),
@@ -43,11 +43,11 @@ public class PersonDisplayConverter implements DTOEntityConverter<PersonDisplayD
                 person.getCityOfBirth() == null ?
                         null: person.getCityOfBirth().getName(),
                 person.getCityOfBirth() == null ?
-                        null: person.getCityOfBirth().getPptbr(),
+                        0: person.getCityOfBirth().getPptbr(),
                 person.getCityOfResidence() == null ?
                         null: person.getCityOfResidence().getName(),
                 person.getCityOfResidence() == null ?
-                        null: person.getCityOfResidence().getPptbr()
+                        0: person.getCityOfResidence().getPptbr()
         );
     }
 }

@@ -8,16 +8,19 @@ import org.springframework.stereotype.Service;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonDisplayConverter;
 import rs.ac.bg.fon.tps_backend.converter.impl.PersonSaveConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
+import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
 import rs.ac.bg.fon.tps_backend.lambda.UpdateQuery;
 import rs.ac.bg.fon.tps_backend.mapper.PersonRowMapper;
+import rs.ac.bg.fon.tps_backend.repository.custom.PersonTemplateRepository;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
 import rs.ac.bg.fon.tps_backend.mapper.CityRowMapper;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
 import java.util.List;
+
 @Service("personTemplateServiceImpl")
 @RequiredArgsConstructor
 public class PersonTemplateServiceImpl implements PersonService {
@@ -27,6 +30,7 @@ public class PersonTemplateServiceImpl implements PersonService {
     private final PersonRowMapper personRowMapper;
     private final CityRowMapper cityRowMapper;
     private final PersonValidator personValidator;
+    private final PersonTemplateRepository personTemplateRepository;
 
     @Override
     public List<PersonDisplayDTO> getAll() {
@@ -119,19 +123,18 @@ public class PersonTemplateServiceImpl implements PersonService {
 
     }
 
-    public PersonDisplayDTO getPersonById(Long id) throws Exception {
-        val personDB = jdbcTemplate.queryForObject(
-                "SELECT * FROM select_person_by_id(?)",
-                 personRowMapper, id);
+    public Person getPersonById(Long id) throws Exception {
+       val personDbOpt = personTemplateRepository.getPersonById(id,
+                "CALL select_person_by_id(?,?)");
 
-        if(personDB == null) {
-            throw new EntityNotFoundException("Person with given id does not exist");
-        }
+       if(personDbOpt.isEmpty()){
+           throw new EntityNotFoundException("Person with given id does not exist");
+       }
 
-        return personDisplayConverter.toDto(
-                personDB
-        );
+       return personDbOpt.get();
     }
+
+
 
     public List<PersonDisplayDTO> getAllSmederevci() {
         return personDisplayConverter.listToDTO(

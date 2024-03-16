@@ -1,6 +1,8 @@
 package rs.ac.bg.fon.tps_backend.exception;
 
 import jakarta.validation.ConstraintViolationException;
+import lombok.extern.java.Log;
+import lombok.val;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
@@ -13,18 +15,26 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.logging.Level;
 
 @ControllerAdvice
+@Log
 public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
 
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorPayload> handleException(Exception e) {
+        if(e == null) {
+            throw new IllegalArgumentException("Exception may not be null");
+        }
+
         System.out.println("EXCEPTION OCCURRED.");
 
-        final var errorPayload = new ErrorPayload(e.getMessage());
+        val errorPayload = new ErrorPayload(e.getMessage());
+        log.log(Level.WARNING, Arrays.toString(e.getStackTrace()));
         e.printStackTrace();
         return new ResponseEntity<>(errorPayload, HttpStatus.NOT_FOUND);
     }
@@ -34,6 +44,10 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
                                                                   HttpHeaders headers,
                                                                   HttpStatusCode status,
                                                                   WebRequest request) {
+        if(ex == null){
+            throw new IllegalArgumentException("Exception may not be null");
+        }
+
         final Map<String, String> errors = new HashMap<>();
         final List<ObjectError> objectErrors =
                 ex.getBindingResult().getAllErrors();
