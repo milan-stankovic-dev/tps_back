@@ -176,7 +176,7 @@ class PersonControllerTest {
         doNothing().when(personService)
                 .deletePerson(1L);
 
-        val JSONResponse = mvc.perform(delete(requestUrl + "/{id}",1L)
+        mvc.perform(delete(requestUrl + "/{id}",1L)
                         .contentType(MediaType.APPLICATION_JSON))
                 .andExpect(status().isNoContent());
 

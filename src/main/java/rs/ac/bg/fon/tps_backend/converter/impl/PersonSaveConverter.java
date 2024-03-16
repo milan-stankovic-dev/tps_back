@@ -1,5 +1,6 @@
 package rs.ac.bg.fon.tps_backend.converter.impl;
 
+import lombok.val;
 import org.springframework.stereotype.Component;
 import rs.ac.bg.fon.tps_backend.converter.DTOEntityConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
@@ -14,10 +15,10 @@ public class PersonSaveConverter implements DTOEntityConverter<PersonSaveDTO, Pe
             return null;
         }
 
-        final var cityOfBirth = City.builder()
+        val cityOfBirth = City.builder()
                 .pptbr(personSaveDTO.birthCityCode())
                 .build();
-        final var cityOfResidence = City.builder()
+        val cityOfResidence = City.builder()
                 .pptbr(personSaveDTO.residenceCityCode())
                 .build();
 
