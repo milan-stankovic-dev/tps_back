@@ -1,6 +1,5 @@
 package rs.ac.bg.fon.tps_backend.exception;
 
-import jakarta.validation.ConstraintViolationException;
 import lombok.extern.java.Log;
 import lombok.val;
 import org.springframework.http.HttpHeaders;

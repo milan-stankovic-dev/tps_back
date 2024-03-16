@@ -1,6 +1,5 @@
 package rs.ac.bg.fon.tps_backend.converter.impl;
 
-import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Component;
 import rs.ac.bg.fon.tps_backend.converter.DTOEntityConverter;
 import rs.ac.bg.fon.tps_backend.domain.City;
@@ -8,9 +7,7 @@ import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
 
 @Component
-@RequiredArgsConstructor
 public class PersonDisplayConverter implements DTOEntityConverter<PersonDisplayDTO, Person> {
-    private final CityConverter cityConverter;
 
     @Override
     public Person toEntity(PersonDisplayDTO personDisplayDTO) {

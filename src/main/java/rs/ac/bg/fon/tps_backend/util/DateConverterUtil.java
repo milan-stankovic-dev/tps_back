@@ -1,11 +1,8 @@
 package rs.ac.bg.fon.tps_backend.util;
 
 import lombok.RequiredArgsConstructor;
-import lombok.val;
 import org.springframework.stereotype.Component;
-import rs.ac.bg.fon.tps_backend.constants.DateConstant;
 
-import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.Date;
@@ -13,7 +10,6 @@ import java.util.Date;
 @Component
 @RequiredArgsConstructor
 public class DateConverterUtil {
-    private final DateConstant dateConstant;
     public LocalDate utilDateToLocalDate(java.util.Date date) {
         if(date == null){
             throw new IllegalArgumentException("Date may not be null.");

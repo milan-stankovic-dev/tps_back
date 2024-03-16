@@ -11,16 +11,12 @@ import rs.ac.bg.fon.tps_backend.domain.Person;
 import rs.ac.bg.fon.tps_backend.dto.PersonDisplayDTO;
 import rs.ac.bg.fon.tps_backend.dto.PersonSaveDTO;
 import rs.ac.bg.fon.tps_backend.exception.UnknownCityException;
-import rs.ac.bg.fon.tps_backend.mapper.CityRowMapper;
-import rs.ac.bg.fon.tps_backend.mapper.PersonRowMapper;
 import rs.ac.bg.fon.tps_backend.repository.CityRepository;
 import rs.ac.bg.fon.tps_backend.repository.PersonRepository;
 import rs.ac.bg.fon.tps_backend.service.PersonService;
 import rs.ac.bg.fon.tps_backend.validator.PersonValidator;
 
-import java.sql.ResultSet;
 import java.sql.SQLException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
