@@ -32,7 +32,6 @@ import static org.assertj.core.api.Assertions.assertThatThrownBy;
 class PersonValidatorTest {
     @Spy
     private static PersonValidator personValidator;
-
     private static PersonConstraintsConstants constraints ;
 
     @BeforeAll
